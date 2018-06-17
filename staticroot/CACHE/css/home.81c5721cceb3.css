@@ -1,0 +1,18 @@
+/* line 8, staticfiles/scss/home/home.scss */
+#cover-photo {
+  margin-top: 100px;
+  max-width: 100%;
+  z-index: 40; }
+
+/* line 14, staticfiles/scss/home/home.scss */
+#page-bg {
+  position: absolute;
+  top: 450px;
+  background-color: #F0F1F5;
+  z-index: 50;
+  width: 100%; }
+
+/* line 22, staticfiles/scss/home/home.scss */
+#search-cabin-box {
+  border: 1px solid black;
+  border-color: #707070; }

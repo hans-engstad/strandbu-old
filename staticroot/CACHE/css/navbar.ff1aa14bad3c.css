@@ -1,0 +1,16 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 11, staticfiles/scss/common/navbar.scss */
+#test {
+  color: red; }
+
+/* line 15, staticfiles/scss/common/navbar.scss */
+#global-navbar {
+  background-color: black; }
+
+/* line 19, staticfiles/scss/common/navbar.scss */
+.navbar-custom {
+  background-color: red;
+  border-radius: 0px; }

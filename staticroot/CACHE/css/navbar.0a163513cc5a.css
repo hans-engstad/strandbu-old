@@ -1,0 +1,15 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 11, staticfiles/scss/common/navbar.scss */
+#test {
+  color: red; }
+
+/* line 17, staticfiles/scss/common/navbar.scss */
+#global-navbar {
+  background-color: #01588C;
+  border-radius: 0px; }
+  /* line 21, staticfiles/scss/common/navbar.scss */
+  #global-navbar #nav-logo {
+    height: 200px; }

@@ -1,0 +1,59 @@
+@import 'variables';
+
+
+
+.default-box{
+	border: 1px solid $default-box-border-color;
+	padding: 10px;
+	box-shadow: 1px 1px 1px grey;
+	background-color: $default-box-color;
+}
+
+.default-header{
+	text-align: center;
+	font-weight: $font-semibold;
+	margin-bottom: 25px;
+
+}
+
+.default-sub-header{
+	text-align: center;
+	font-weight: $font-semilight;
+}
+
+
+.search-cabin-form{
+	border: 1px solid grey;
+	padding: 10px;
+}
+
+.search-cabin-input{
+	border: 0px;
+	background-color: $default-box-color;
+	height: 40px;
+	text-align: center;
+	width: 100%;
+}
+
+.search-cabin-input:focus{
+	border: 0px;
+	box-shadow: 0px 0px 0px;
+	outline: none;
+}
+
+.search-cabin-inputgroup{
+	
+}
+
+#to-date{
+	border-right: 1px solid grey;
+	border-left: 1px solid grey;
+}
+
+.semilight-color{
+	color: $font-semilight-color;
+}
+
+.hide{
+	display: none;
+}

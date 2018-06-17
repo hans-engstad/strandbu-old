@@ -1,0 +1,11 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 11, staticfiles/scss/common/navbar.scss */
+#test {
+  color: red; }
+
+/* line 15, staticfiles/scss/common/navbar.scss */
+.navbar-default {
+  background-color: black; }

@@ -1,0 +1,32 @@
+@import "variables";
+
+html
+{
+    font-size: 100%;
+}
+
+
+
+
+
+$link-color: white;
+
+#global-navbar {
+    background-color: $navbar-bg-color;
+    border-radius: 0px;
+    height: $navbar-height;
+    margin-bottom: 0px;
+
+    #nav-logo{
+    	height: $navbar-height - ($navbar-logo-margins * 2);
+    }
+
+	.nav-link{
+		color: $link-color;
+		font-weight: bold;
+	}
+
+	.nav-link:hover, .nav-link:disabled, .nav-link:enabled {
+		background-color: $navbar-bg-color;
+	}
+}

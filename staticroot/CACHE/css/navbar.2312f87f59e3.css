@@ -1,0 +1,12 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 11, staticfiles/scss/common/navbar.scss */
+#test {
+  color: red; }
+
+/* line 17, staticfiles/scss/common/navbar.scss */
+.navbar-custom {
+  background-color: #01588C;
+  border-radius: 0px; }

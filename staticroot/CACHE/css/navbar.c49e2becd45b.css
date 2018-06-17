@@ -1,0 +1,19 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 16, staticfiles/scss/common/navbar.scss */
+#global-navbar {
+  background-color: #01588C;
+  border-radius: 0px;
+  height: 100px; }
+  /* line 21, staticfiles/scss/common/navbar.scss */
+  #global-navbar #nav-logo {
+    height: 130px; }
+  /* line 25, staticfiles/scss/common/navbar.scss */
+  #global-navbar .nav-link {
+    color: white;
+    font-weight: bold; }
+  /* line 30, staticfiles/scss/common/navbar.scss */
+  #global-navbar .nav-link:hover {
+    background-color: #01588C; }

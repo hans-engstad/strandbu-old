@@ -1,0 +1,28 @@
+@import '../common/variables';
+
+$z-index: (
+	photo: 40,
+	page: 50,
+);
+
+#cover-photo{
+	margin-top: $navbar-height;
+	max-width: 100%;
+	z-index: map-get($z-index, photo);
+}
+
+#page-bg{
+	position: absolute;
+	top: $navbar-height + $home-image-height;
+	background-color: $home-page-bg-color;
+	z-index: map-get($z-index, page);
+	width: 100%;
+
+	padding: 25px;
+}
+
+#search-cabin-box{
+	margin: auto;
+	width: 50%;
+
+}
