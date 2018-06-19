@@ -49,7 +49,7 @@ def Home(request):
 				res['persons'] = c.persons
 				cabins_dict['cabin_' + c.number.__str__()] = res
 
-			args = {'cabins' : cabins_dict}
+			args = {'cabins' : cabins_dict, 'from_date' : from_date, 'to_date': to_date}
 			print(args)
 
 			return render(request, 'main/show_cabins.html', args)

@@ -2,6 +2,12 @@
 
 {% block body %}
 
-	
+	<p>{{ from_date }} - {{ to_date }}</p>
+
+	{% for key, cabin in cabins.items %}
+
+		<p>Cabin: {{ cabin.number }}</p>
+
+	{% endfor %}
 
 {% endblock %}

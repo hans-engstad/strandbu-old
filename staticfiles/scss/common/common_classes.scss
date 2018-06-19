@@ -2,6 +2,10 @@
 
 
 
+#body{
+	margin-top: $navbar-height;
+}
+
 .default-box{
 	border: 1px solid $default-box-border-color;
 	padding: 10px;

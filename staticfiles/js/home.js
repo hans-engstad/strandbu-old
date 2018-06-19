@@ -4,7 +4,8 @@ $('#from-date-field').datepicker({
     startDate: '+1d',
     weekStart: 1,
     maxViewMode: 0,
-    orientation: 'bottom'
+    orientation: 'bottom',
+    container:'#from-date'
 });
 
 $('#from-date-field').datepicker().on('show', function(e){ onDatepickerShow(e.date, '#from-date-field'); });
@@ -21,7 +22,8 @@ $('#to-date-field').datepicker({
     startDate: '+2d',
     weekStart: 1,
     maxViewMode: 0,
-    orientation: 'bottom'
+    orientation: 'bottom',
+    container: '#to-date'
 });
 
 $('#to-date-field').datepicker().on('show', function(e){ onDatepickerShow(e.date, '#to-date-field'); });
