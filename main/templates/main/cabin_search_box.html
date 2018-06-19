@@ -5,31 +5,27 @@
 			<div id="from-date" class="search-cabin-form-inputgroup col-sm">
 				<span class="semilight-color">Innsjekk</span>
 				<br>
-				<input id="from-date-field" class="search-cabin-input">
+				<input onkeydown="return false;" id="from-date-field" class="search-cabin-input hide-cursor">
 			</div>
 			<div id="to-date" class="col-sm search-cabin-form-inputgroup">
 				<span class="semilight-color">Utsjekk</span>
 				<br>
-				<input id="to-date-field" class="search-cabin-input">
+				<input onkeydown="return false;" id="to-date-field" class="search-cabin-input hide-cursor">
 			</div>
 			<div id="persons" class="col-sm search-cabin-form-inputgroup">
-				<span class="semilight-color">Antall gjester</span>
+				<span id="persons-header" class="semilight-color">Antall gjester</span>
 				<br>
-				<input id="person-amount" class="search-cabin-input">
+				<input id="persons-input" class="search-cabin-input col-sm hide-cursor" placeholder="1">
 			</div>
-			<div id="search-button" class="col-sm">
-				<button class="btn" onClick="submitSearch()">søk</button>
+			<div id="search-button-container" class="col-sm">
+				<button id="search-button" class="normal-button" onClick="submitSearch()">søk</button>
 			</div>
 			<form id="search-cabin-form" method="POST">
 				{% csrf_token %}
-				<input id="from-date-field-form" class="hide">
-				<input id="to-date-field-form" class="hide">
-				<input id="person-amount-form" class="hide">
+				<input id="from-date-field-form" name="from-date" class="hide">
+				<input id="to-date-field-form" name="to-date" class="hide">
+				<input id="person-amount-form" name="persons" class="hide">
 			</form>
 		</div>
-		
-		
-		
 	</div>
-	
 </div>

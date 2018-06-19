@@ -19,10 +19,44 @@ $z-index: (
 	width: 100%;
 
 	padding: 25px;
+
+	padding-bottom: 500px;
 }
 
 #search-cabin-box{
 	margin: auto;
 	width: 50%;
+}
 
+#persons-input-group{
+	margin-left: 10px;
+	margin-right: 0px;
+
+	margin-top: 7px;
+
+	width: 120px;
+}
+
+#persons-input{
+	text-align: center;
+}
+
+#search-button{
+	height: 100%;
+	width: 100%;
+
+}
+
+.persons-square-button{
+	height: 35px;
+
+	background-color: $square-button-color;
+	border: 0px;
+};
+
+#persons-choose-box{
+	width: 100px;
+	height: 100px;
+
+	background-color: white;
 }

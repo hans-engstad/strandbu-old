@@ -1,0 +1,25 @@
+/* line 8, staticfiles/scss/home/home.scss */
+#cover-photo {
+  margin-top: 100px;
+  max-width: 100%;
+  z-index: 40; }
+
+/* line 14, staticfiles/scss/home/home.scss */
+#page-bg {
+  position: absolute;
+  top: 450px;
+  background-color: #F0F1F5;
+  z-index: 50;
+  width: 100%;
+  padding: 25px;
+  padding-bottom: 500px; }
+
+/* line 26, staticfiles/scss/home/home.scss */
+#search-cabin-box {
+  margin: auto;
+  width: 50%; }
+
+/* line 32, staticfiles/scss/home/home.scss */
+#persons-input-group {
+  margin-left: 10px;
+  margin-right: 10px; }
