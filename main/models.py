@@ -11,6 +11,12 @@ class CabinImage(models.Model):
 	def __str__(self):
 		return self.name
 
+class CabinEquipment(models.Model):
+	eqp = models.CharField(max_length=50)
+
+	def __str__(self):
+		return self.eqp
+
 class Cabin(models.Model):
 	number = models.IntegerField(unique=True)
 	persons = models.IntegerField()
@@ -19,8 +25,11 @@ class Cabin(models.Model):
 	short_description = models.CharField(max_length=256, default="")
 	long_description = models.CharField(max_length=512, default="")
 
+	price = models.IntegerField()
+
 	images = models.ManyToManyField(CabinImage, blank=True)
 
+	equipment = models.ManyToManyField(CabinEquipment, blank=True)
 
 	@classmethod
 	def get_cabin_by_number(self, _number):

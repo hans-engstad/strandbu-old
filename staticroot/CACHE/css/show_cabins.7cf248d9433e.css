@@ -1,0 +1,78 @@
+/* line 3, staticfiles/scss/show_cabins.scss */
+#date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 9, staticfiles/scss/show_cabins.scss */
+#info-header {
+  text-align: center;
+  font-weight: 700; }
+
+/* line 15, staticfiles/scss/show_cabins.scss */
+#cabin-search-result {
+  padding: 5px;
+  width: 60%;
+  margin: auto; }
+
+/* line 28, staticfiles/scss/show_cabins.scss */
+.cabin-result-img {
+  width: 100%; }
+
+/* line 32, staticfiles/scss/show_cabins.scss */
+.cabin-result-label {
+  background-color: white;
+  border: 1px solid grey;
+  padding: 10px;
+  margin-bottom: 5px; }
+
+/* line 39, staticfiles/scss/show_cabins.scss */
+.cabin-result-content {
+  border: 1px solid grey;
+  border-top: 0px;
+  margin-bottom: 10px;
+  padding: 40px;
+  background-color: #E4E8F6; }
+
+/* line 58, staticfiles/scss/show_cabins.scss */
+.accordion-label {
+  border: 0px;
+  background-color: transparent;
+  width: 100%;
+  text-align: left; }
+  /* line 64, staticfiles/scss/show_cabins.scss */
+  .accordion-label:focus {
+    outline: none; }
+  /* line 68, staticfiles/scss/show_cabins.scss */
+  .accordion-label:hover {
+    cursor: pointer; }
+
+/* line 74, staticfiles/scss/show_cabins.scss */
+.accordion-label-box {
+  background-color: white;
+  padding: 25px;
+  border: 1px solid grey;
+  margin-top: 5px; }
+  /* line 80, staticfiles/scss/show_cabins.scss */
+  .accordion-label-box:hover {
+    cursor: pointer;
+    background-color: #E4E8F6; }
+
+/* line 86, staticfiles/scss/show_cabins.scss */
+.accordion-label-selected {
+  background-color: #E4E8F6; }
+
+/* line 90, staticfiles/scss/show_cabins.scss */
+.cabin-image-carousel {
+  width: 100%; }
+
+/* line 94, staticfiles/scss/show_cabins.scss */
+.accordion-label-header {
+  margin-left: 10px;
+  font-size: 19px;
+  font-weight: 500; }
+
+/* line 100, staticfiles/scss/show_cabins.scss */
+.accordion-content {
+  background-color: #E4E8F6;
+  border: 1px solid grey; }

@@ -2,6 +2,12 @@
 
 
 
+h1, h2, h3, h4, h5, h6, p, td{
+	&:hover{
+		cursor: default;
+	}
+}
+
 #body{
 	margin-top: $navbar-height;
 }
@@ -57,14 +63,31 @@
 
 	color: white;
 	font-weight: $font-semibold;
+
+	text-align: center;
+
+	&:hover{
+		cursor: pointer;
+	}
 }
 
 .default-link{
 	color: #3A8437;
 	text-decoration: underline;
+	font-weight: $font-semibold;
+
+	&:hover{
+		cursor: pointer;
+	}
 }
 
 .default-page-bg{
 	background-color: $home-page-bg-color;
 	padding-bottom: 500px;
+}
+
+.center-content{
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
