@@ -1,6 +1,30 @@
 
 
-var chosenCabin = -1;
+
+
+
+
+
+function showCabin(number){
+	//Reset all 
+	$('.cabin-result-img').addClass("hide");
+	$('.cabin-result-label').removeClass("hide");
+	$('.cabin-result-content').addClass("hide");
+
+	//Show selected cabin
+	$('#cabin-result-img-' + number).removeClass("hide");
+	$('#cabin-result-label-' + number).addClass("hide");
+	$('#cabin-result-content-' + number).removeClass("hide");
+}
+
+
+
+
+
+
+
+
+/*var chosenCabin = -1;
 function accordionClick(cabinNumber){
 
 	if($('#content-' + cabinNumber).hasClass('collapsing'))
@@ -36,4 +60,4 @@ function accordionClick(cabinNumber){
 
 
 	chosenCabin = cabinNumber;
-}
+}*/

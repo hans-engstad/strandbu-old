@@ -53,11 +53,9 @@ def Home(request):
 				res['title'] = c.title
 				res['short_description'] = c.short_description
 				res['long_description'] = c.long_description
-
-				images = c.images.all().values_list('img', flat=True) 
-
-
-				res['images'] = images
+				res['equipment'] = c.equipment.all().values_list('eqp', flat=True)
+				res['images'] = c.images.all().values_list('img', flat=True) 
+				res['price'] = c.price
 				
 
 				cabins_dict['cabin_' + c.number.__str__()] = res
