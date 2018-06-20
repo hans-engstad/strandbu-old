@@ -1,0 +1,53 @@
+/* line 8, staticfiles/scss/home/home.scss */
+#cover-photo {
+  max-width: 100%;
+  z-index: 40; }
+
+/* line 14, staticfiles/scss/home/home.scss */
+#page-bg {
+  position: absolute;
+  top: 450px;
+  background-color: #F0F1F5;
+  z-index: 50;
+  width: 100%;
+  padding: 25px;
+  padding-bottom: 500px; }
+
+/* line 26, staticfiles/scss/home/home.scss */
+#search-cabin-container {
+  margin: auto;
+  width: 50%;
+  border: 0px;
+  background-color: transparent; }
+
+/* line 33, staticfiles/scss/home/home.scss */
+#search-cabin-box {
+  background-color: white; }
+
+/* line 37, staticfiles/scss/home/home.scss */
+#persons-input-group {
+  margin-left: 10px;
+  margin-right: 0px;
+  margin-top: 7px;
+  width: 120px; }
+
+/* line 46, staticfiles/scss/home/home.scss */
+#persons-input {
+  text-align: center; }
+
+/* line 50, staticfiles/scss/home/home.scss */
+#search-button {
+  height: 100%;
+  width: 100%; }
+
+/* line 56, staticfiles/scss/home/home.scss */
+.persons-square-button {
+  height: 35px;
+  background-color: #D1DAFF;
+  border: 0px; }
+
+/* line 63, staticfiles/scss/home/home.scss */
+#persons-choose-box {
+  width: 100px;
+  height: 100px;
+  background-color: white; }

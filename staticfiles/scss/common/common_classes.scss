@@ -6,6 +6,13 @@
 	margin-top: $navbar-height;
 }
 
+#phone-layout{
+	text-align: center;
+	font-size: 14px;
+	position: relative;
+	top: -10px;
+}
+
 .default-box{
 	border: 1px solid $default-box-border-color;
 	padding: 10px;
@@ -25,22 +32,6 @@
 	font-weight: $font-semilight;
 }
 
-
-.search-cabin-form{
-	border: 1px solid grey;
-	padding: 10px;
-}
-
-.search-cabin-input{
-	border: 0px;
-	background-color: $default-box-color;
-	height: 40px;
-	text-align: center;
-	width: 100%;
-
-	
-}
-
 .hide-cursor{
 	font-weight: 600;
 	color: transparent;
@@ -52,21 +43,6 @@
 	}
 }
 
-.search-cabin-input:focus{
-	border: 0px;
-	box-shadow: 0px 0px 0px;
-	outline: none;
-}
-
-.search-cabin-inputgroup{
-	
-}
-
-#to-date{
-	border-right: 1px solid grey;
-	border-left: 1px solid grey;
-}
-
 .semilight-color{
 	color: $font-semilight-color;
 }
@@ -75,13 +51,20 @@
 	display: none;
 }
 
-
-
 .normal-button{
 	background-color: $normal-button-color;
 	border: 0px;
 
 	color: white;
 	font-weight: $font-semibold;
+}
 
+.default-link{
+	color: #3A8437;
+	text-decoration: underline;
+}
+
+.default-page-bg{
+	background-color: $home-page-bg-color;
+	padding-bottom: 500px;
 }

@@ -1,0 +1,45 @@
+/* line 3, staticfiles/scss/show_cabins.scss */
+#date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 9, staticfiles/scss/show_cabins.scss */
+#info-header {
+  text-align: center;
+  font-weight: 700; }
+
+/* line 15, staticfiles/scss/show_cabins.scss */
+#cabin-search-result {
+  padding: 5px;
+  width: 60%;
+  margin: auto; }
+
+/* line 25, staticfiles/scss/show_cabins.scss */
+.accordion-label {
+  border: 0px;
+  background-color: transparent;
+  width: 100%;
+  text-align: left; }
+  /* line 31, staticfiles/scss/show_cabins.scss */
+  .accordion-label:focus {
+    outline: none; }
+  /* line 35, staticfiles/scss/show_cabins.scss */
+  .accordion-label:hover {
+    cursor: pointer; }
+
+/* line 40, staticfiles/scss/show_cabins.scss */
+.accordion-label-box {
+  background-color: white;
+  padding: 10px;
+  border: 1px solid grey;
+  margin-top: 5px; }
+
+/* line 49, staticfiles/scss/show_cabins.scss */
+.cabin-image-carousel {
+  width: 100%; }
+
+/* line 53, staticfiles/scss/show_cabins.scss */
+.accordion-label-header {
+  font-size: 19px;
+  font-weight: 500; }

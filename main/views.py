@@ -5,6 +5,9 @@ from django.shortcuts import render, HttpResponse
 from main.forms import CabinSearch
 from datetime import datetime
 from main.models import Booking
+#from strandbu.settings import dev as settings
+from django.contrib.staticfiles.templatetags.staticfiles import static
+import os
 
 
 
@@ -47,10 +50,26 @@ def Home(request):
 				res = {}
 				res['number'] = c.number
 				res['persons'] = c.persons
+				res['title'] = c.title
+				res['short_description'] = c.short_description
+				res['long_description'] = c.long_description
+
+				images = c.images.all().values_list('img', flat=True) 
+
+
+				res['images'] = images
+				
+
 				cabins_dict['cabin_' + c.number.__str__()] = res
 
-			args = {'cabins' : cabins_dict, 'from_date' : from_date, 'to_date': to_date}
-			print(args)
+			info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
+			info_header = info_header + "<br>Derimot er det mulig å dele opp i 2 perioder." 
+
+			info_header = ""
+
+			print(cabins_dict)
+
+			args = {'cabins' : cabins_dict, 'from_date' : from_date, 'to_date': to_date, 'info_header': info_header}
 
 			return render(request, 'main/show_cabins.html', args)
 		else:

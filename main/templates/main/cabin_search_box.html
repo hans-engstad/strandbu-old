@@ -1,24 +1,24 @@
-<div id="search-cabin-box" class="default-box">
+<div id="search-cabin-box">
 	<h4 class="default-sub-header">Hytte</h4>
 	<div class="container search-cabin-form">
 		<div class="row">
 			<div id="from-date" class="search-cabin-form-inputgroup col-sm">
-				<span class="semilight-color">Innsjekk</span>
+				<span class="semilight-color serach-cabin-field-header">Innsjekk</span>
 				<br>
 				<input onkeydown="return false;" id="from-date-field" class="search-cabin-input hide-cursor">
 			</div>
 			<div id="to-date" class="col-sm search-cabin-form-inputgroup">
-				<span class="semilight-color">Utsjekk</span>
+				<span class="semilight-color serach-cabin-field-header">Utsjekk</span>
 				<br>
 				<input onkeydown="return false;" id="to-date-field" class="search-cabin-input hide-cursor">
 			</div>
 			<div id="persons" class="col-sm search-cabin-form-inputgroup">
-				<span id="persons-header" class="semilight-color">Antall gjester</span>
+				<span id="persons-header" class="semilight-color serach-cabin-field-header">Antall gjester</span>
 				<br>
 				<input id="persons-input" class="search-cabin-input col-sm hide-cursor" placeholder="1">
 			</div>
 			<div id="search-button-container" class="col-sm">
-				<button id="search-button" class="normal-button" onClick="submitSearch()">søk</button>
+				<button id="search-button" class="normal-button" onClick="submitSearch()"><span class="glyphicon glyphicon-search"></span> Søk</button>
 			</div>
 			<form id="search-cabin-form" method="POST">
 				{% csrf_token %}
@@ -28,4 +28,7 @@
 			</form>
 		</div>
 	</div>
+	<br>
+	<p id="contact-info">Ta kontakt for bestilling av camping med bobil, campingvogn eller telt.</p>
+	{% include 'main/phone_layout.html'%}
 </div>

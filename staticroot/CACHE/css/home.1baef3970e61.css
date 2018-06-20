@@ -1,0 +1,56 @@
+/* line 8, staticfiles/scss/home/home.scss */
+#cover-photo {
+  max-width: 100%;
+  z-index: 40; }
+
+/* line 14, staticfiles/scss/home/home.scss */
+#page-bg {
+  position: absolute;
+  top: 450px;
+  background-color: #F0F1F5;
+  z-index: 50;
+  width: 100%;
+  padding: 25px;
+  padding-bottom: 500px; }
+
+/* line 26, staticfiles/scss/home/home.scss */
+#search-cabin-box {
+  margin: auto;
+  width: 50%;
+  background-color: white;
+  padding: 5px;
+  padding-bottom: -10px;
+  border: 1px solid #707070; }
+
+/* line 35, staticfiles/scss/home/home.scss */
+#persons-input-group {
+  margin-left: 10px;
+  margin-right: 0px;
+  margin-top: 7px;
+  width: 120px; }
+
+/* line 44, staticfiles/scss/home/home.scss */
+#persons-input {
+  text-align: center; }
+
+/* line 48, staticfiles/scss/home/home.scss */
+#search-button {
+  height: 100%;
+  width: 100%; }
+
+/* line 54, staticfiles/scss/home/home.scss */
+.persons-square-button {
+  height: 35px;
+  background-color: #D1DAFF;
+  border: 0px; }
+
+/* line 61, staticfiles/scss/home/home.scss */
+#persons-choose-box {
+  width: 100px;
+  height: 100px;
+  background-color: white; }
+
+/* line 68, staticfiles/scss/home/home.scss */
+#contact-info {
+  text-align: center;
+  font-size: 12px; }

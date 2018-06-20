@@ -1,0 +1,79 @@
+/* line 5, staticfiles/scss/common/common_classes.scss */
+#body {
+  margin-top: 100px; }
+
+/* line 9, staticfiles/scss/common/common_classes.scss */
+#phone-layout {
+  text-align: center;
+  font-size: 14px; }
+
+/* line 16, staticfiles/scss/common/common_classes.scss */
+.default-box {
+  border: 1px solid #707070;
+  padding: 10px;
+  box-shadow: 1px 1px 1px grey;
+  background-color: #FFFFFF; }
+
+/* line 23, staticfiles/scss/common/common_classes.scss */
+.default-header {
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 25px; }
+
+/* line 30, staticfiles/scss/common/common_classes.scss */
+.default-sub-header {
+  text-align: center;
+  font-weight: 400; }
+
+/* line 36, staticfiles/scss/common/common_classes.scss */
+.search-cabin-form {
+  border: 1px solid grey;
+  padding: 10px; }
+
+/* line 41, staticfiles/scss/common/common_classes.scss */
+.search-cabin-input {
+  border: 0px;
+  background-color: #FFFFFF;
+  height: 40px;
+  text-align: center;
+  width: 100%; }
+
+/* line 51, staticfiles/scss/common/common_classes.scss */
+.hide-cursor {
+  font-weight: 600;
+  color: transparent;
+  text-shadow: 0 0 0 black; }
+  /* line 56, staticfiles/scss/common/common_classes.scss */
+  .hide-cursor:focus {
+    outline: none; }
+
+/* line 62, staticfiles/scss/common/common_classes.scss */
+.search-cabin-input:focus {
+  border: 0px;
+  box-shadow: 0px 0px 0px;
+  outline: none; }
+
+/* line 72, staticfiles/scss/common/common_classes.scss */
+#to-date {
+  border-right: 1px solid grey;
+  border-left: 1px solid grey;
+  margin-top: 0px; }
+
+/* line 78, staticfiles/scss/common/common_classes.scss */
+.semilight-color {
+  color: #6E6E6E; }
+
+/* line 82, staticfiles/scss/common/common_classes.scss */
+.hide {
+  display: none; }
+
+/* line 88, staticfiles/scss/common/common_classes.scss */
+.normal-button {
+  background-color: #3A8437;
+  border: 0px;
+  color: white;
+  font-weight: 500; }
+
+/* line 96, staticfiles/scss/common/common_classes.scss */
+.search-cabin-form-inputgroup {
+  padding-top: 0px; }

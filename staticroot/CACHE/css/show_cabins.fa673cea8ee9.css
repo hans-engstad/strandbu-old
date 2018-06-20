@@ -1,0 +1,16 @@
+/* line 3, staticfiles/scss/show_cabins.scss */
+#date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 9, staticfiles/scss/show_cabins.scss */
+#info-header {
+  text-align: center;
+  font-weight: 700; }
+
+/* line 15, staticfiles/scss/show_cabins.scss */
+.cabin-search-result {
+  padding: 5px;
+  width: 60%;
+  margin: auto; }

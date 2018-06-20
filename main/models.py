@@ -4,15 +4,28 @@ import datetime
 # Create your models here.
 
 
+class CabinImage(models.Model):
+	name = models.CharField(max_length=50, default="")
+	img = models.ImageField(upload_to="cabins")
+
+	def __str__(self):
+		return self.name
+
 class Cabin(models.Model):
 	number = models.IntegerField(unique=True)
 	persons = models.IntegerField()
 
+	title = models.CharField(max_length=100, default="")
+	short_description = models.CharField(max_length=256, default="")
+	long_description = models.CharField(max_length=512, default="")
+
+	images = models.ManyToManyField(CabinImage, blank=True)
+
 
 	@classmethod
-	def get_persons(self, _number):
+	def get_cabin_by_number(self, _number):
 		cabin = Cabin.objects.filter(number=_number)
-		return cabin.persons
+		return cabin
 
 	def __str__(self):
 		return "[" + self.number.__str__() + "]"

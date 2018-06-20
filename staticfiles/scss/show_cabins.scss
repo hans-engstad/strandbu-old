@@ -1,0 +1,70 @@
+@import 'common/variables';
+
+#date-header{
+	text-align: center;
+	font-weight: $font-semibold;
+	text-decoration: underline;
+}
+
+#info-header{
+	text-align: center;
+	font-weight: $font-bold;
+
+}
+
+#cabin-search-result{
+	padding: 5px;
+	width: 60%;
+	margin: auto;
+}
+
+#cabin-accordion{
+
+}
+
+.accordion-label{
+	border: 0px;
+	background-color: transparent;
+	width: 100%;
+	text-align: left;
+
+	&:focus{
+		outline: none;
+	}
+
+	&:hover{
+		cursor: pointer;
+	}
+
+}
+
+.accordion-label-box{
+	background-color: white;
+	padding: 25px;
+	border: 1px solid grey;
+	margin-top: 5px;
+
+	&:hover{
+		cursor: pointer;
+		background-color: $accordion-hover-color;
+	}
+}
+
+.accordion-label-selected{
+	background-color: $accordion-hover-color;
+}
+
+.cabin-image-carousel{
+	width: 100%;
+}
+
+.accordion-label-header{
+	margin-left: 10px;
+	font-size: 19px;
+	font-weight: $font-semibold;
+}
+
+.accordion-content{
+	background-color: $accordion-hover-color;
+	border: 1px solid grey;
+}
