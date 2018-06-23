@@ -1,0 +1,17 @@
+/* line 3, staticfiles/scss/booking/booking_contact.scss */
+#contact-info-container {
+  width: 60%;
+  padding-top: 50px; }
+
+/* line 8, staticfiles/scss/booking/booking_contact.scss */
+.contact-info-row {
+  width: 100%; }
+
+/* line 12, staticfiles/scss/booking/booking_contact.scss */
+.contact-input {
+  width: 100%; }
+
+/* line 16, staticfiles/scss/booking/booking_contact.scss */
+.contact-input-container {
+  border: 1px solid grey;
+  margin: 10px; }

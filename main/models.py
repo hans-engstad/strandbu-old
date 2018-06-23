@@ -1,4 +1,5 @@
 from django.db import models
+from django_countries.fields import CountryField
 import datetime
 
 # Create your models here.
@@ -40,15 +41,30 @@ class Cabin(models.Model):
 		return "[" + self.number.__str__() + "]"
 
 
+class ContactInfo(models.Model):
+	name = models.CharField(max_length=255)
+	mail = models.CharField(max_length=255)
+	phone = models.CharField(max_length=30)
+	country = CountryField()
+
+
+class BookingManager(models.Model):
+
+
+class TentativeBooking(models.Model):
+	
+
 class Booking(models.Model):
-	from_date = models.DateField()
+	from_date = models.DateField(50)
 	to_date = models.DateField()
 	cabin_number = models.IntegerField()
 	active = models.BooleanField(default=True)
 
+	contact = models.ForeignKey(ContactInfo, on_delete=models.SET_NULL, null=True)
+
 
 	@classmethod
-	def get_available_cabins(self, _from_date, _to_date, _persons):
+	def get_available_cabins(cls, _from_date, _to_date, _persons):
 
 		print(_persons)
 
@@ -75,8 +91,6 @@ class Booking(models.Model):
 		#create array of dates to check
 		dates_to_check = get_dates_between(_from_date, _to_date)
 
-		
-
 		for b in bookings:
 			remove_current_cabin = True
 
@@ -88,7 +102,7 @@ class Booking(models.Model):
 
 			booking_dates = get_dates_between(b.from_date, b.to_date)
 			#if this date is in dates_to_check, remove this cabin from available
-			if dates_is_overlapping(booking_dates, dates_to_check):
+			if dates_are_overlapping(booking_dates, dates_to_check):
 				#remove this cabin number from available cabins
 				remove_current_cabin = True
 
@@ -99,6 +113,26 @@ class Booking(models.Model):
 		#print(cabin_types)
 
 		return cabin_types
+
+	@classmethod
+	def create_booking(cls, _from_date, _to_date, _number, _contact):
+		with transaction.atomic():
+			all_bookings = Booking.objects.select_for_update()	#will lock all bookings until the end of this transaction block
+
+			#Check if this is a valid booking
+			booking = Booking()	
+
+			booking.from_date = _from_date
+			booking.to_date = _to_date
+			booking.cabin_number = _number
+			booking.contact = _contact
+
+			if booking_is_valid(booking, all_bookings):
+				booking.save()
+				return True
+			else:
+				return False
+
 
 
 	def __str__(self):
@@ -132,7 +166,7 @@ def get_dates_between(_from_date, _to_date):
 
 	return dates_to_check
 
-def dates_is_overlapping(_date1, _date2):
+def dates_are_overlapping(_date1, _date2):
 	#note date1 and date2 are arrays
 	for d1 in _date1:
 		for d2 in _date2:
@@ -140,4 +174,20 @@ def dates_is_overlapping(_date1, _date2):
 				return True
 	return False
 
+def booking_is_valid(cls, _booking, _all_bookings):
 
+	#create array of dates to check
+	dates_to_check = get_dates_between(_booking.from_date, booking.to_date)
+
+	for b in bookings:
+		if _booking.cabin_number == b.cabin_number:
+			#Check next booking, these bookings don't affect each other
+			continue
+
+		booking_dates = get_dates_between(b.from_date, b.to_date)
+		#if dates in bookings are overlapping, this booking is not valid
+		if dates_are_overlapping(booking_dates, dates_to_check):
+			#remove this cabin number from available cabins
+			return False
+	#If method comes here, then everything ok, booking is valid
+	return True

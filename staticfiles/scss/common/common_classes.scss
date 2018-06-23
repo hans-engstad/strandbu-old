@@ -38,6 +38,20 @@ h1, h2, h3, h4, h5, h6, p, td{
 	font-weight: $font-semilight;
 }
 
+.default-input{
+	background-color: transparent;
+	padding: 10px;
+	border: 0px;
+	margin-bottom: 1px;
+	font-size: 20px;
+}
+
+.default-input-header{
+	color: #707070;
+	font-size: 15px;
+	margin-bottom: 0px;
+}
+
 .hide-cursor{
 	font-weight: 600;
 	color: transparent;
@@ -91,3 +105,4 @@ h1, h2, h3, h4, h5, h6, p, td{
 	align-items: center;
 	justify-content: center;
 }
+

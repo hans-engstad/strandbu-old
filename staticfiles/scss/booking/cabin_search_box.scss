@@ -1,0 +1,69 @@
+@import '../common/variables';
+
+#search-cabin-box{
+	margin: auto;
+	width: 60%;
+	background-color: white;
+	padding: 5px 7% 0px 7%;
+	border: 1px solid $default-box-border-color;
+	box-shadow: 1px 1px 1px grey;
+}
+
+#to-date{
+	border-right: 1px solid grey;
+	border-left: 1px solid grey;
+}
+
+#persons-choose-box{
+	width: 100px;
+	height: 100px;
+
+	background-color: white;
+}
+
+#contact-info{
+	text-align: center;
+	font-size: 12px;
+}
+
+#persons-input-group{
+	margin-left: 10px;
+	margin-right: 0px;
+	margin-top: 7px;
+
+	width: 120px;
+}
+
+#persons-input{
+	text-align: center;
+}
+
+#search-button{
+	height: 100%;
+	width: 100%;
+	font-size: 18px;
+}
+
+
+.serach-cabin-field-header{
+	font-size: 14px;
+}
+
+.search-cabin-form{
+	border: 1px solid grey;
+	padding: 7px 10px 7px 10px;
+}
+
+.search-cabin-input{
+	border: 0px;
+	background-color: $default-box-color;
+	height: 30px;
+	text-align: center;
+	width: 100%;
+
+	&:focus{
+		border: 0px;
+		box-shadow: 0px 0px 0px;
+		outline: none;
+	}
+}

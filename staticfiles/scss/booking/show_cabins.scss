@@ -1,4 +1,4 @@
-@import 'common/variables';
+@import '../common/variables';
 
 #date-header{
 	text-align: center;
@@ -19,14 +19,9 @@
 }
 
 
-
-
-
-
-
-
 .cabin-result-img{
 	width: 100%;
+	box-shadow: 1px 1px 1px grey;
 }
 
 .cabin-result-label{
@@ -34,6 +29,8 @@
 	border: 1px solid grey;
 	padding: 10px;
 	margin-bottom: 5px;
+
+	box-shadow: 1px 1px 1px grey;
 
 	&:hover{
 		cursor: pointer;
@@ -53,6 +50,8 @@
 	padding: 40px;
 
 	background-color: $accordion-hover-color;
+
+	box-shadow: 1px 1px 1px grey;
 }
 
 .more-link{
@@ -98,60 +97,6 @@
 	color: #505050;
 	line-height: 0px;
 }
-
-
-
-
-
-
-.accordion-label{
-	border: 0px;
-	background-color: transparent;
-	width: 100%;
-	text-align: left;
-
-	&:focus{
-		outline: none;
-	}
-
-	&:hover{
-		cursor: pointer;
-	}
-
-}
-
-.accordion-label-box{
-	background-color: white;
-	padding: 25px;
-	border: 1px solid grey;
-	margin-top: 5px;
-
-	&:hover{
-		cursor: pointer;
-		background-color: $accordion-hover-color;
-	}
-}
-
-.accordion-label-selected{
-	background-color: $accordion-hover-color;
-}
-
-.cabin-image-carousel{
-	width: 100%;
-}
-
-.accordion-label-header{
-	margin-left: 10px;
-	font-size: 19px;
-	font-weight: $font-semibold;
-}
-
-.accordion-content{
-	background-color: $accordion-hover-color;
-	border: 1px solid grey;
-}
-
-
 
 
 

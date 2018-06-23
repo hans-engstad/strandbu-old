@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Title of the document</title>
+		<title>{% block title %}Strandbu{% endblock %}</title>
 
 		<!-- Font Awesome -->
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
@@ -20,7 +20,9 @@
 			<link rel="stylesheet" type="text/x-scss" href="/static/scss/common/navbar.scss" />
 			<link rel="stylesheet" type="text/x-scss" href="/static/scss/common/common_classes.scss" />
 			<link rel="stylesheet" type="text/x-scss" href="/static/scss/home/home.scss" />
-			<link rel="stylesheet" type="text/x-scss" href="/static/scss/show_cabins.scss" />
+			<link rel="stylesheet" type="text/x-scss" href="/static/scss/booking/show_cabins.scss" />
+			<link rel="stylesheet" type="text/x-scss" href="/static/scss/booking/cabin_search_box.scss" />
+			<link rel="stylesheet" type="text/x-scss" href="/static/scss/booking/booking_contact.scss" />
 		{% endcompress %} 
 
 		
@@ -86,6 +88,7 @@
 
 		<script src="{% static 'js/home.js'%}"></script>
 		<script src="{% static 'js/show_cabins.js'%}"></script>
+		<script src="{% static 'js/booking_contact.js'%}"></script>
 
 	</body>
 

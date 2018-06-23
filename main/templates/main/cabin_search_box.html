@@ -20,7 +20,7 @@
 			<div id="search-button-container" class="col-sm">
 				<button id="search-button" class="normal-button" onClick="submitSearch()"><span class="glyphicon glyphicon-search"></span> Søk</button>
 			</div>
-			<form id="search-cabin-form" method="POST">
+			<form id="search-cabin-form" method="POST" action="{% url 'show_cabins' %}">
 				{% csrf_token %}
 				<input id="from-date-field-form" name="from-date" class="hide">
 				<input id="to-date-field-form" name="to-date" class="hide">
@@ -30,5 +30,5 @@
 	</div>
 	<br>
 	<p id="contact-info">Ta kontakt for bestilling av camping med bobil, campingvogn eller telt.</p>
-	{% include 'main/phone_layout.html'%}
+	<p id="phone-layout"><i class="fas fa-phone"></i> {% include 'constants/phone_number.html'%}</p>
 </div>

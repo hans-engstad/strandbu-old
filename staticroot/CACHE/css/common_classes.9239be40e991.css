@@ -1,0 +1,86 @@
+/* line 6, staticfiles/scss/common/common_classes.scss */
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, p:hover, td:hover {
+  cursor: default; }
+
+/* line 11, staticfiles/scss/common/common_classes.scss */
+#body {
+  margin-top: 100px; }
+
+/* line 15, staticfiles/scss/common/common_classes.scss */
+#phone-layout {
+  text-align: center;
+  font-size: 14px;
+  position: relative;
+  top: -10px; }
+
+/* line 22, staticfiles/scss/common/common_classes.scss */
+.default-box {
+  border: 1px solid #707070;
+  padding: 10px;
+  box-shadow: 1px 1px 1px grey;
+  background-color: #FFFFFF; }
+
+/* line 29, staticfiles/scss/common/common_classes.scss */
+.default-header {
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 25px; }
+
+/* line 36, staticfiles/scss/common/common_classes.scss */
+.default-sub-header {
+  text-align: center;
+  font-weight: 400; }
+
+/* line 41, staticfiles/scss/common/common_classes.scss */
+.default-input {
+  background-color: white;
+  padding: 10px;
+  border: 0px; }
+
+/* line 47, staticfiles/scss/common/common_classes.scss */
+.hide-cursor {
+  font-weight: 600;
+  color: transparent;
+  text-shadow: 0 0 0 black; }
+  /* line 52, staticfiles/scss/common/common_classes.scss */
+  .hide-cursor:focus {
+    outline: none; }
+
+/* line 58, staticfiles/scss/common/common_classes.scss */
+.semilight-color {
+  color: #6E6E6E; }
+
+/* line 62, staticfiles/scss/common/common_classes.scss */
+.hide {
+  display: none; }
+
+/* line 66, staticfiles/scss/common/common_classes.scss */
+.normal-button {
+  background-color: #3A8437;
+  border: 0px;
+  color: white;
+  font-weight: 500;
+  text-align: center; }
+  /* line 75, staticfiles/scss/common/common_classes.scss */
+  .normal-button:hover {
+    cursor: pointer; }
+
+/* line 80, staticfiles/scss/common/common_classes.scss */
+.default-link {
+  color: #3A8437;
+  text-decoration: underline;
+  font-weight: 500; }
+  /* line 85, staticfiles/scss/common/common_classes.scss */
+  .default-link:hover {
+    cursor: pointer; }
+
+/* line 90, staticfiles/scss/common/common_classes.scss */
+.default-page-bg {
+  background-color: #F0F1F5;
+  padding-bottom: 500px; }
+
+/* line 95, staticfiles/scss/common/common_classes.scss */
+.center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center; }

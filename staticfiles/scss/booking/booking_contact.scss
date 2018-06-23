@@ -1,0 +1,33 @@
+@import '../common/variables';
+
+#contact-info-container{
+	width: 60%;
+	padding-top: 50px;
+}
+
+.contact-info-row{
+	width: 100%;
+}
+
+.contact-input{
+	width: 100%;
+}
+
+.contact-input-container{
+	border: 1px solid grey;
+	margin-bottom: 20px;
+}
+
+#contact-country-container{
+	margin-right: 10px;
+}
+
+
+#country-input{
+	-webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+
+    width: 100%;
+}

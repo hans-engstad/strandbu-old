@@ -17,7 +17,14 @@ function showCabin(number){
 	$('#cabin-result-content-' + number).removeClass("hide");
 }
 
+function chooseCabin(number){
 
+	//Submit correct form
+	$('#cabin-form-' + number).submit();
+
+	console.log("sub");
+
+}
 
 
 

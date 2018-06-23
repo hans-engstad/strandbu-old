@@ -83,10 +83,10 @@
 										</div>
 										<div class="col-6 center-content">
 											<div class="choose-cabin-container">
-												<h4 class="cabin-price">fra {{ cabin.price }} kr</h4>
+												<h4 class="cabin-price">{{ cabin.price }} kr</h4>
 												<p class="cabin-per-night-text">per natt</p>
 
-												<button style="" class="normal-button choose-cabin-button">Velg hytte</button>
+												<button style="" class="normal-button choose-cabin-button" onClick="chooseCabin({{ cabin.number }})">Velg hytte</button>
 											</div>
 										</div>
 									</div>
@@ -94,7 +94,12 @@
 							</div>
 						</div>
 				</div>
+				<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'contact_info' %}">
+					{% csrf_token %}
+					{{ cabin.choose_form }}
 
+					
+				</form>
 				
 			{% endfor %}
 		</div>

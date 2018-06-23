@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block body %}
+	<div id="contact-info-container" class="container .default-page-bg">
+		<div class="center-content">
+			<form>
+				<div class="row contact-info-row">
+					<div class="col-12 contact-input-container">
+						<p class="default-input-header">Fullt navn</p>
+						{% render_field contactForm.full_name class+="default-input contact-input" %}
+					</div>
+				</div>
+				<div class="row contact-info-row">
+					<div class="col-12 contact-input-container">
+						<p class="default-input-header">E-postadresse</p>
+						{% render_field contactForm.email class+="default-input contact-input" %}
+					</div>
+				</div>
+				<div class="row contact-info-row">
+					<div id="contact-country-container" class="col contact-input-container" onClick="select('#country-input')" >
+						<p class="default-input-header">Land</p>
+						<div class="center-content">
+							{% render_field contactForm.country class+="default-input" id="country-input"%}
+							<i class="fa fa-chevron-down"></i>
+						</div>
+						
+					</div>
+					<div class="col contact-input-container">
+						<p class="default-input-header">Mobilnummer</p>
+						{% render_field contactForm.phone class+="default-input contact-input" %}
+					</div>
+				</div>
+				<div class="row contact-info-row">
+					<div class="col-12">
+						<button>Fortsett</button>
+					</div>
+				</div>
+				{{ chooseForm.as_p }}
+			</form>
+		</div>
+	</div>
+{% endblock %}
