@@ -4,11 +4,12 @@
 {% block body %}
 	<div id="contact-info-container" class="container .default-page-bg">
 		<div class="center-content">
-			<form>
+			<form action="{% url 'confirm_booking' %}" method="POST">
+				{% csrf_token %}
 				<div class="row contact-info-row">
 					<div class="col-12 contact-input-container">
 						<p class="default-input-header">Fullt navn</p>
-						{% render_field contactForm.full_name class+="default-input contact-input" %}
+						{% render_field contactForm.name class+="default-input contact-input" %}
 					</div>
 				</div>
 				<div class="row contact-info-row">
@@ -33,7 +34,7 @@
 				</div>
 				<div class="row contact-info-row">
 					<div class="col-12">
-						<button>Fortsett</button>
+						<button type="submit" id="continue-button" class="normal-button">Fortsett</button>
 					</div>
 				</div>
 				{{ chooseForm.as_p }}

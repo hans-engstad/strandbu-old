@@ -4,7 +4,7 @@ from django.shortcuts import render, HttpResponse, redirect
 #from dateutil import parser
 from main.forms import CabinSearch, CabinChoose, Contact
 from datetime import datetime
-from main.models import Booking
+from main.models import BookingManager
 #from strandbu.settings import dev as settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 import os
@@ -51,7 +51,7 @@ def ShowCabins(request):
 			to_date = form.cleaned_data['to_date']
 			persons = form.cleaned_data['persons']
 
-			cabins = Booking.get_available_cabins(from_date, to_date, persons)
+			cabins = BookingManager.get_available_cabins(from_date, to_date, persons)
 
 			cabins_dict = {}
 			for c in cabins:
@@ -82,9 +82,6 @@ def ShowCabins(request):
 			if cabins.count() == 0:
 				info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
 			
-
-			
-
 			print(cabins_dict)
 
 			args = {'cabins' : cabins_dict, 'from_date' : from_date, 'to_date': to_date, 'info_header': info_header}
@@ -100,17 +97,27 @@ def ShowCabins(request):
 
 def ContactInfo(request):
 	if request.method == 'POST':
-
-		data = {
-			'from_date': request.POST.get('from_date'),
-			'to_date': request.POST.get('to_date'),
-			'number': request.POST.get('number')
-		}
-
-		chooseForm = CabinChoose(data)
+		chooseForm = CabinChoose(request.POST)
 		if chooseForm.is_valid():
+			#create tentative booking
+
+			from_date = chooseForm.data['from_date']
+			to_date = chooseForm.data['to_date']
+			number = chooseForm.data['number']
+
+			t_booking_id = BookingManager.create_tentative_booking(from_date, to_date, number)
+			if t_booking_id == False:
+				#Cabin no longer available, try again
+				#Consider feedback to end-user here, to avoid confusion
+				return redirect('home')
+
 			contactForm = Contact()
-			args = {'contactForm': contactForm, 'chooseForm': chooseForm}
+
+			data = chooseForm.data.copy()
+			data['t_booking_id'] = t_booking_id
+			newChooseForm = CabinChoose(data)
+
+			args = {'contactForm': contactForm, 'chooseForm': newChooseForm}
 
 			return render(request, 'main/booking_contact_info.html', args)
 		else:
@@ -121,3 +128,13 @@ def ContactInfo(request):
 	else:
 		print("Wrong request method")
 		return redirect('home')
+
+def ConfirmBooking(request):
+
+	contactForm = Contact(request.POST)
+	cabinChooseForm = CabinChoose(request.POST)
+
+	if contactForm.is_valid() and cabinChooseForm.is_valid() and cabinChooseForm.data['t_booking_id']:
+		print("Booking ready for confirmation")
+	else:
+		return HttpResponse('contactForm or cabinChooseForm did not pass validation')

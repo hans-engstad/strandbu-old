@@ -2,6 +2,7 @@ from django import forms
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 import datetime
+from . import models
 
 class CabinSearch(forms.Form):
 	from_date = forms.DateField()
@@ -19,11 +20,17 @@ class CabinChoose(forms.Form):
 	number = forms.IntegerField(
 		widget=forms.HiddenInput()
 	)
-
-class Contact(forms.Form):
-	full_name = forms.CharField()
-	email = forms.CharField(required=False)
-	country = CountryField().formfield(
-		widget=CountrySelectWidget()
+	t_booking_id = forms.IntegerField(
+		widget=forms.HiddenInput(),
+		required=False
 	)
-	phone = forms.CharField()
+
+class Contact(forms.ModelForm):
+
+	email = forms.CharField(required=False)
+
+	class Meta:
+		model = models.ContactInfo
+		fields = ('name', 'email', 'phone', 'country')
+		widgets = {'country': CountrySelectWidget()}
+

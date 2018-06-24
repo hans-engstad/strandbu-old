@@ -22,7 +22,6 @@
 	margin-right: 10px;
 }
 
-
 #country-input{
 	-webkit-appearance: none;
     -moz-appearance: none;
@@ -30,4 +29,9 @@
     text-overflow: '';
 
     width: 100%;
+}
+
+#continue-button{
+	width: 100%;
+	padding: 10px;
 }

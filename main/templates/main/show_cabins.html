@@ -97,8 +97,6 @@
 				<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'contact_info' %}">
 					{% csrf_token %}
 					{{ cabin.choose_form }}
-
-					
 				</form>
 				
 			{% endfor %}

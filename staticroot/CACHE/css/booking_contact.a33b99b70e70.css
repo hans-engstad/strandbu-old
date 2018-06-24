@@ -1,0 +1,34 @@
+/* line 3, staticfiles/scss/booking/booking_contact.scss */
+#contact-info-container {
+  width: 60%;
+  padding-top: 50px; }
+
+/* line 8, staticfiles/scss/booking/booking_contact.scss */
+.contact-info-row {
+  width: 100%; }
+
+/* line 12, staticfiles/scss/booking/booking_contact.scss */
+.contact-input {
+  width: 100%; }
+
+/* line 16, staticfiles/scss/booking/booking_contact.scss */
+.contact-input-container {
+  border: 1px solid grey;
+  margin-bottom: 20px; }
+
+/* line 21, staticfiles/scss/booking/booking_contact.scss */
+#contact-country-container {
+  margin-right: 10px; }
+
+/* line 25, staticfiles/scss/booking/booking_contact.scss */
+#country-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-indent: 1px;
+  text-overflow: '';
+  width: 100%; }
+
+/* line 34, staticfiles/scss/booking/booking_contact.scss */
+#continue-button {
+  width: 100%;
+  padding: 10px; }
