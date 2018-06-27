@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="default-page-bg">
+	<div class="container">
+		<br>
+		<p class="date-header">{{ from_date }} - {{ to_date }}</p>
+
+		<div id="content-container">
+			<div class="row default-box booking-box">
+				<div class="col">
+					<span class="booking-title">{{cabin.title}} </span>
+				</div>
+				<div class="col">
+					<span class="default-link change-link">Endre</span>
+				</div>
+			</div>
+
+			<br>
+			<span id="add-cabin-link" class="center-hor">
+				<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
+			</span>
+			<br>
+
+			<h3 class="center-hor">Betaling</h3>
+			<br>
+
+			<div class="row default-box booking-box">
+				<div class="col-1">
+					<div class="round">
+						<input type="checkbox" id="late-arrival-checkbox" />
+						<label for="late-arrival-checkbox"></label>
+					</div>
+				</div>
+				<div class="col">
+					Sen ankomst (etter 18:00)
+				</div>
+			</div>
+
+			<br>
+
+			<div class="row default-box booking-box">
+				<div class="col-1">
+					<div class="round">
+						<input type="checkbox" id="conditions-checkbox" />
+						<label for="conditions-checkbox"></label>
+					</div>
+				</div>
+				<div class="col">
+					Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+@import '../common/variables';
+
+
+.date-header{
+	text-align: center;
+	font-weight: $font-semibold;
+	text-decoration: underline;
+}
+
+#content-container{
+	width: 60%;
+	margin: auto;
+}
+
+.change-link{
+	float: right;
+}
+
+.booking-title{
+	font-size: 20px;
+	font-weight: $font-semibold;
+}
+
+.booking-box{
+	padding: 15px;
+	justify-content: center;
+}
+
+#add-cabin-link{
+
+	
+
+	&:hover{
+		cursor: pointer;
+	}
+}
+
+#add-cabin-plus{
+	margin-right: 5px;
+	margin-top: 5px;
+}

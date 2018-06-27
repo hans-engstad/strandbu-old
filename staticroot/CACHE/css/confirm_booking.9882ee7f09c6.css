@@ -1,0 +1,9 @@
+/* line 4, staticfiles/scss/booking/confirm_booking.scss */
+.date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 10, staticfiles/scss/booking/confirm_booking.scss */
+#content-container {
+  width: 60%; }

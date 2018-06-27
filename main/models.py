@@ -61,7 +61,7 @@ class TentativeBooking(models.Model):
 	created_date = models.DateTimeField(auto_now=True)
 
 	def is_active(self):
-		if timezone.now() >= self.created_date + datetime.timedelta(minutes=10):
+		if timezone.now() >= self.created_date + datetime.timedelta(minutes=20):
 			return False
 		return True
 

@@ -4,7 +4,7 @@ from django.shortcuts import render, HttpResponse, redirect
 #from dateutil import parser
 from main.forms import CabinSearch, CabinChoose, Contact
 from datetime import datetime
-from main.models import BookingManager
+from main.models import BookingManager, TentativeBooking, Cabin
 #from strandbu.settings import dev as settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 import os
@@ -134,7 +134,32 @@ def ConfirmBooking(request):
 	contactForm = Contact(request.POST)
 	cabinChooseForm = CabinChoose(request.POST)
 
-	if contactForm.is_valid() and cabinChooseForm.is_valid() and cabinChooseForm.data['t_booking_id']:
-		print("Booking ready for confirmation")
+	booking_id = cabinChooseForm.data.get('t_booking_id')
+	if not booking_id:
+		return HttpResponse('Could not find tentative booking id')
+
+
+	booking = TentativeBooking.objects.get(id=booking_id)
+
+	if booking == None:
+		#Booking does not exist, user have not taken correct path to this view
+		return HttpResponse('Could not find booking with requested id')
+	elif not booking.is_active():
+		#Booking has expired
+		print(booking)
+		return HttpResponse('session have expired')
+	elif contactForm.is_valid() and cabinChooseForm.is_valid() and booking_id:
+		
+		cabin = Cabin.objects.get(number=cabinChooseForm.data.get('number'))
+
+		args = {
+			'contactForm': contactForm,
+			'chooseForm': cabinChooseForm,
+			'from_date': cabinChooseForm.data['from_date'],
+			'to_date': cabinChooseForm.data['to_date'],
+			'cabin': cabin,
+		}
+
+		return render(request, 'main/confirm_booking.html', args)
 	else:
 		return HttpResponse('contactForm or cabinChooseForm did not pass validation')
