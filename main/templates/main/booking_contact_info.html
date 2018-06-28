@@ -32,6 +32,30 @@
 						{% render_field contactForm.phone class+="default-input contact-input" %}
 					</div>
 				</div>
+				<br>
+				<div class="row default-box booking-box">
+					<div class="col-1">
+						<div class="round">
+							<!--<input type="checkbox" id="late-arrival-checkbox" />-->
+							{% render_field contactForm.late_arrival %}
+						</div>
+					</div>
+					<div class="col">
+						Sen ankomst (etter 18:00)
+					</div>
+				</div>
+				<br>
+				<div class="row default-box booking-box">
+					<div class="col-1">
+						<div class="round">
+							{% render_field contactForm.accept_conditions %}
+						</div>
+					</div>
+					<div class="col">
+						Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span>
+					</div>
+				</div>
+
 				<div class="row contact-info-row">
 					<div class="col-12">
 						<button type="submit" id="continue-button" class="normal-button">Fortsett</button>

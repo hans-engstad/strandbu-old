@@ -1,0 +1,82 @@
+/* line 4, staticfiles/scss/booking/confirm_booking.scss */
+.date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 10, staticfiles/scss/booking/confirm_booking.scss */
+#content-container {
+  width: 60%;
+  margin: auto; }
+
+/* line 15, staticfiles/scss/booking/confirm_booking.scss */
+.change-link {
+  float: right; }
+
+/* line 19, staticfiles/scss/booking/confirm_booking.scss */
+.booking-title {
+  font-size: 20px;
+  font-weight: 500; }
+
+/* line 24, staticfiles/scss/booking/confirm_booking.scss */
+.booking-box {
+  padding: 15px;
+  justify-content: center; }
+
+/* line 33, staticfiles/scss/booking/confirm_booking.scss */
+#add-cabin-link:hover {
+  cursor: pointer; }
+
+/* line 38, staticfiles/scss/booking/confirm_booking.scss */
+#add-cabin-plus {
+  margin-right: 5px;
+  margin-top: 5px; }
+
+/* line 43, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .panel-title {
+  display: inline;
+  font-weight: bold; }
+
+/* line 47, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .form-control.error {
+  border-color: red;
+  outline: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6); }
+
+/* line 52, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box label.error {
+  font-weight: bold;
+  color: red;
+  padding: 2px 8px;
+  margin-top: 2px; }
+
+/* line 58, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .payment-errors {
+  font-weight: bold;
+  color: red;
+  padding: 2px 8px;
+  margin-top: 2px; }
+
+/* line 64, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box label {
+  display: block; }
+
+/* The old "center div vertically" hack */
+/* line 68, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .display-table {
+  display: table; }
+
+/* line 71, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .display-tr {
+  display: table-row; }
+
+/* line 74, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .display-td {
+  display: table-cell;
+  vertical-align: middle;
+  width: 50%; }
+
+/* Just looks nicer */
+/* line 80, staticfiles/scss/booking/confirm_booking.scss */
+.credit-card-box .panel-heading img {
+  min-width: 180px; }

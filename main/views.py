@@ -1,12 +1,10 @@
 from django.shortcuts import render
-# from django.views.generic import TemplateView
 from django.shortcuts import render, HttpResponse, redirect
-#from dateutil import parser
 from main.forms import CabinSearch, CabinChoose, Contact
 from datetime import datetime
 from main.models import BookingManager, TentativeBooking, Cabin
-#from strandbu.settings import dev as settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from strandbu.settings.dev import STRIPE_TEST_PUBLIC_KEY as stripe_pk
 import os
 
 
@@ -119,6 +117,12 @@ def ContactInfo(request):
 
 			args = {'contactForm': contactForm, 'chooseForm': newChooseForm}
 
+
+			request.session['cabinChoose_num'] = newChooseForm.data['number']
+			request.session['cabinChoose_from_date'] = newChooseForm.data['from_date']
+			request.session['cabinChoose_to_date'] = newChooseForm.data['to_date']
+			request.session['cabinChoose_tentative_id'] = t_booking_id
+
 			return render(request, 'main/booking_contact_info.html', args)
 		else:
 			print("Choose form did not pass validation")
@@ -152,14 +156,26 @@ def ConfirmBooking(request):
 		
 		cabin = Cabin.objects.get(number=cabinChooseForm.data.get('number'))
 
+
+
+		request.session['first_name'] = contactForm.data.get('full_name')
+		request.session['email'] = contactForm.data.get('mail')
+		request.session['phone'] = contactForm.data.get('phone')
+		request.session['country'] = contactForm.data.get('country')
+
 		args = {
 			'contactForm': contactForm,
 			'chooseForm': cabinChooseForm,
 			'from_date': cabinChooseForm.data['from_date'],
 			'to_date': cabinChooseForm.data['to_date'],
 			'cabin': cabin,
+			'stripe_pk': stripe_pk,
 		}
 
 		return render(request, 'main/confirm_booking.html', args)
 	else:
 		return HttpResponse('contactForm or cabinChooseForm did not pass validation')
+
+
+def ChargeBooking(request):
+	return HttpResponse(request.session)

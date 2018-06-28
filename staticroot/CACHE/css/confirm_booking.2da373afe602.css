@@ -1,0 +1,37 @@
+/* line 4, staticfiles/scss/booking/confirm_booking.scss */
+.date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 10, staticfiles/scss/booking/confirm_booking.scss */
+#content-container {
+  width: 60%;
+  margin: auto; }
+
+/* line 15, staticfiles/scss/booking/confirm_booking.scss */
+.change-link {
+  float: right; }
+
+/* line 19, staticfiles/scss/booking/confirm_booking.scss */
+.booking-title {
+  font-size: 20px;
+  font-weight: 500; }
+
+/* line 24, staticfiles/scss/booking/confirm_booking.scss */
+.booking-box {
+  padding: 15px;
+  justify-content: center; }
+
+/* line 33, staticfiles/scss/booking/confirm_booking.scss */
+#add-cabin-link:hover {
+  cursor: pointer; }
+
+/* line 38, staticfiles/scss/booking/confirm_booking.scss */
+#add-cabin-plus {
+  margin-right: 5px;
+  margin-top: 5px; }
+
+/* line 43, staticfiles/scss/booking/confirm_booking.scss */
+#card-image {
+  width: auto; }

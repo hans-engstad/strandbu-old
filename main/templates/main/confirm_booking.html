@@ -7,49 +7,95 @@
 		<p class="date-header">{{ from_date }} - {{ to_date }}</p>
 
 		<div id="content-container">
-			<div class="row default-box booking-box">
-				<div class="col">
-					<span class="booking-title">{{cabin.title}} </span>
-				</div>
-				<div class="col">
-					<span class="default-link change-link">Endre</span>
-				</div>
-			</div>
-
-			<br>
-			<span id="add-cabin-link" class="center-hor">
-				<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
-			</span>
-			<br>
-
-			<h3 class="center-hor">Betaling</h3>
-			<br>
-
-			<div class="row default-box booking-box">
-				<div class="col-1">
-					<div class="round">
-						<input type="checkbox" id="late-arrival-checkbox" />
-						<label for="late-arrival-checkbox"></label>
+			<form action="{% url 'charge_booking' %}" method="post" class="needs-validation">
+				{% csrf_token %}
+				<div class="row default-box booking-box">
+					<div class="col">
+						<span class="booking-title">{{cabin.title}} </span>
+					</div>
+					<div class="col">
+						<span class="default-link change-link">Endre</span>
 					</div>
 				</div>
-				<div class="col">
-					Sen ankomst (etter 18:00)
-				</div>
-			</div>
 
-			<br>
+				<br>
+				<span id="add-cabin-link" class="center-hor">
+					<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
+				</span>
+				<br>
 
-			<div class="row default-box booking-box">
-				<div class="col-1">
-					<div class="round">
-						<input type="checkbox" id="conditions-checkbox" />
-						<label for="conditions-checkbox"></label>
+				
+				<br>
+
+				<div class="row default-box booking-box">
+					<div class="col-1">
+						<div class="round">
+							<input type="checkbox" id="late-arrival-checkbox" />
+							<label for="late-arrival-checkbox"></label>
+						</div>
+					</div>
+					<div class="col">
+						Sen ankomst (etter 18:00)
 					</div>
 				</div>
-				<div class="col">
-					Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span>
+
+				<br>
+
+				<div class="row default-box booking-box">
+					<div class="col-1">
+						<div class="round">
+							<input type="checkbox" class="form-control" id="conditions-checkbox" required />
+							<label for="conditions-checkbox"></label>
+							<span id="conditions-error-text" class="invalid-feedback">Du må godta prisbetingelsene</span>
+						</div>
+					</div>
+					<div class="col">
+						Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span>
+					</div>
 				</div>
-			</div>
+
+				<br>
+				<h3 class="center-hor">Betaling</h3>
+
+			    <div class="row default-box booking-box">
+				    <div class="row">
+				        <div class="col">
+	                        <div class="form-group">
+	                            <label for="cc-number" class="control-label mb-1">Card number</label>
+	                            <input id="cc-number" name="cc-number" type="tel" class="form-control cc-number identified visa" required pattern="[0-9]{16}">
+	                            <span class="invalid-feedback">Enter a valid 16 digit card number</span>
+	                        </div>
+	                        <div class="row">
+	                            <div class="col-6">
+	                                <div class="form-group">
+	                                    <label for="cc-exp" class="control-label mb-1">Expiration</label>
+	                                    <input id="cc-exp" name="cc-exp" type="tel" class="form-control cc-exp" required placeholder="MM / YY" autocomplete="cc-exp">
+	                                    <span class="invalid-feedback">Enter the expiration date</span>
+	                                </div>
+	                            </div>
+	                            <div class="col-6">
+	                                <label for="x_card_code" class="control-label mb-1">Security code</label>
+	                                <div class="input-group">
+	                                    <input id="x_card_code" name="x_card_code" type="tel" class="form-control cc-cvc" required autocomplete="off">
+	                                    <span class="invalid-feedback order-last">Enter the 3-digit code on back</span>
+	                                    <div class="input-group-append">
+	                                        <div class="input-group-text">
+	                                        <span class="fa fa-question-circle fa-lg" data-toggle="popover" data-container="body" data-html="true" data-title="Security Code" 
+	                                        data-content="<div class='text-center one-card'>The 3 digit code on back of the card<div class='visa-mc-cvc-preview'></div></div>"
+	                                        data-trigger="hover"></span>
+	                                        </div>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+				        </div>
+				    </div> 
+			    </div>
+			    <br>
+			    <div>
+			    	<button id="payment-button normal-button" type="submit" >Fullfør</button>
+			    </div>
+			</form>
 		</div>
 	</div>
 

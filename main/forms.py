@@ -28,9 +28,15 @@ class CabinChoose(forms.Form):
 class Contact(forms.ModelForm):
 
 	email = forms.CharField(required=False)
+	late_arrival = forms.BooleanField(required=False)
+	accept_conditions = forms.BooleanField(required=True)
 
 	class Meta:
 		model = models.ContactInfo
-		fields = ('name', 'email', 'phone', 'country')
+		fields = ('name', 'email', 'phone', 'country', 'late_arrival', 'accept_conditions')
 		widgets = {'country': CountrySelectWidget()}
 
+class Payment(forms.Form):
+	card_number = forms.CharField()
+	cvc = forms.CharField()
+	expire_date = forms.CharField()
