@@ -22,8 +22,10 @@ class CabinChoose(forms.Form):
 	)
 	t_booking_id = forms.IntegerField(
 		widget=forms.HiddenInput(),
-		required=False
+		required=False,
+		initial=-1,
 	)
+
 
 class Contact(forms.ModelForm):
 
@@ -46,3 +48,7 @@ class Payment(forms.Form):
 	card_number = forms.CharField()
 	cvc = forms.CharField()
 	expire_date = forms.CharField()
+
+class ChargeForm(forms.Form):
+	token = forms.CharField()
+	t_booking_id = forms.CharField()

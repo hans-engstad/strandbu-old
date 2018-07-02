@@ -51,24 +51,39 @@ class ContactInfo(models.Model):
 
 
 
-
-
-class TentativeBooking(models.Model):
+class = Booking(models.Model):
 	from_date = models.DateField()
 	to_date = models.DateField()
-	cabin_number = models.IntegerField()
+	cabins = models.ManyToManyField(Cabin)
 
 	created_date = models.DateTimeField(auto_now=True)
+	late_arrival = models.BooleanField()
+
+class TentativeBooking(Booking):
+	from_date = models.DateField()
+	to_date = models.DateField()
+	cabins = models.ManyToManyField(Cabin)
+
+	created_date = models.DateTimeField(auto_now=True)
+	late_arrival = models.BooleanField()
 
 	def is_active(self):
-		if timezone.now() >= self.created_date + datetime.timedelta(minutes=20):
+		active_time = 20
+
+		#Add active time if cabin if booking multiple cabins
+		if len(self.cabins) >= 2:
+			active_time = 20
+
+		if timezone.now() >= self.created_date + datetime.timedelta(minutes=active_time):
 			return False
 		return True
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
-		cabin_price = Cabin.objects.get(number=self.cabin_number).price
-		return nights * cabin_price
+		price = 0
+		for cabin in self.cabins:
+			price = price + (cabin.price * nights)
+		return price
 
 	@classmethod
 	def get_active_bookings(cls):
@@ -83,13 +98,14 @@ class TentativeBooking(models.Model):
 
 
 
-class Booking(models.Model):
+class FinalBooking(Booking):
 	from_date = models.DateField()
 	to_date = models.DateField()
 	cabin_number = models.IntegerField()
 	active = models.BooleanField(default=True)
 
 	contact = models.ForeignKey(ContactInfo, on_delete=models.SET_NULL, null=True)
+	late_arrival = models.BooleanField()
 
 	def __str__(self):
 		return "[" + self.cabin_number.__str__() + "] " + self.from_date.__str__() + " -> " + self.to_date.__str__()
@@ -117,8 +133,7 @@ class BookingManager(models.Model):
 		if isinstance(_to_date, datetime.datetime):
 			_to_date = _to_date.date()
 
-		#fetch cabin types matching persons
-		cabin_types = Cabin.objects.filter(persons__gte=_persons)
+		available_cabins = Cabin.objects.all()
 
 		#fetch all bookings that are active
 		bookings = Booking.objects.filter(active=True)
@@ -131,40 +146,44 @@ class BookingManager(models.Model):
 
 		#check normal bookings
 		for b in bookings:
-
 			if not b.active:
 				#Booking not active, check next booking
 				continue
 
-			if not compare_booking_cabing_types(b, cabin_types):
-				#Booking-Cabin is not in cabin types, check next booking
-				continue
-
-			#Check if overlap
+			#The dates in this booking
 			booking_dates = get_dates_between(b.from_date, b.to_date)
-			if dates_are_overlapping(booking_dates, dates_to_check):
-				#remove this cabin number from available cabins
-				cabin_types = cabin_types.exclude(number=b.cabin_number)
 
-			
-
+			#Check all cabins in this booking
+			for cabin in b.cabins:
+				if not cabin_number_match(cabin.number, available_cabins):
+					#cabin not in available cains, check next cabin
+					continue
+				#Check if overlap
+				if dates_are_overlapping(booking_dates, dates_to_check):
+					#remove this cabin number from available cabins
+					available_cabins = available_cabins.exclude(number=cabin.number)
+		
 		#check tentative bookings
 		for t_b in tentative_bookings:
 			if not t_b.is_active():
 				#Booking not active, ignore this, check next
 				continue
 
-			if not compare_booking_cabing_types(t_b, cabin_types):
-				#Booking-cabin is not in cabin types, check next booking
-				continue
-
-			#Check if dates are overlapping
 			booking_dates = get_dates_between(t_b.from_date, t_b.to_date)
-			if dates_are_overlapping(booking_dates, dates_to_check):
-				#remove this cabin number from available cabins
-				cabin_types = cabin_types.exclude(number=t_b.cabin_number)
+			for cabin in t_b.cabins:
+				if not cabin_number_match(cabin.number, available_cabins):
+					#Booking-cabin is not in cabin types, check next cabin
+					continue
+				#Check if dates are overlapping
+				if dates_are_overlapping(booking_dates, dates_to_check):
+					#remove this cabin number from available cabins
+					available_cabins = available_cabins.exclude(number=cabin.number)
 
-		return cabin_types
+
+		#Remove cabins that don't match persons requirement
+		available_cabins = available_cabins.filter(persons__gte=_persons)
+
+		return available_cabins
 
 	@classmethod
 	def create_booking(cls, _from_date, _to_date, _number, _contact):
@@ -245,11 +264,11 @@ def dates_are_overlapping(_date1, _date2):
 				return True
 	return False
 
-def compare_booking_cabing_types(_booking, _cabin_types):
+def cabin_number_match(_cabin_number, _cabin_types):
 	number_is_relevant = False
 	#check if cabin number is in cabin_types
 	for c in _cabin_types:
-		if c.number == _booking.cabin_number:
+		if c.number == _cabin_number:
 			number_is_relevant = True
 			break
 
@@ -261,7 +280,8 @@ def booking_is_valid(_booking, _all_bookings):
 	dates_to_check = get_dates_between(_booking.from_date, _booking.to_date)
 
 	for b in _all_bookings:
-		if not _booking.cabin_number == b.cabin_number or b.active == False:
+		for 
+		if not (_booking.cabin_number == b.cabin_number or b.active == False):
 			#Check next booking, these bookings don't affect each other
 			continue
 

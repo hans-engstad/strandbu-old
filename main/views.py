@@ -133,47 +133,70 @@ def ContactInfo(request):
 		print("Wrong request method")
 		return redirect('home')
 
-def PaymentBooking(request):
+def BookingOverview(request):
+	if not request.method == 'POST':
+		return HttpResponse('Request method must be POST.')
 
-	#Check if tentative booking session is expired
-	t_booking = TentativeBooking.objects.get(id=request.session['cabinChoose_tentative_id'])
+	chooseForm = forms.CabinChoose(request.POST)
+	if not chooseForm.is_valid():
+		return HttpResponse('Choose form did not pass validation')
+	
+	t_booking_id
+	if chooseForm.cleaned_data['t_booking_id'] == -1:
+		#create tentative booking
+
+		from_date = chooseForm.cleaned_data['from_date']
+		to_date = chooseForm.cleaned_data['to_date']
+		number = chooseForm.cleaned_data['number']
+
+		t_booking_id = BookingManager.create_tentative_booking(from_date, to_date, number)
+		if t_booking_id == False:
+			#Cabin no longer available, try again
+			#Consider feedback to end-user here, to avoid confusion
+			#Or redirect to cabin show page, with choose form.
+			return redirect('home')
+		
+	else:
+		#Tentative booking already exist
+		t_booking_id = chooseForm.cleaned_data['t_booking_id']
+
+	#Current tentative booking
+	t_booking = TentativeBooking.objects.get(id=t_booking_id)
+
+	#Check that we have found a tentative booking
 	if t_booking == None:
 		return HttpResponse('Could not find tentative booking with id')
 
+	#Check if tentative booking session is expired
 	if not t_booking.is_active():
 		return HttpResponse('Session expired')
 
-	contactForm = forms.Contact(request.POST)
 
-	if contactForm.is_valid():
-		
-		cabin = Cabin.objects.get(number=t_booking.cabin_number)
+	payment_form = forms.Payment()
 
-		contact = contactForm.save()
+	t_booking_info = {
+		'number': t_booking.cabin_number,
+		'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
+		'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
+		'price': t_booking.get_price(),
+		'id': t_booking.id,
+	}
 
-		# request.session['contact_id'] = contact.id
+	args = {
+		't_booking': t_booking_info,
+	}
 
-		form = forms.Payment()
-
-
-
-		booking = {
-			'number': t_booking.cabin_number,
-			'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
-			'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
-		}
-
-		args = {
-			'booking': booking,
-			'cabin': cabin,
-			'form': form,
-			'contact_form': contactForm,
-		}
-
-		return render(request, 'main/payment_booking.html', args)
-	else:
-		return HttpResponse('contactForm or cabinChooseForm did not pass validation')
+	return render(request, 'main/payment_booking.html', args)
 
 
 def ChargeBooking(request):
+
+	if not request.method == 'POST':
+		return HttpResponse('Request method must be POST.')
+
+	form = forms.ChargeForm(request.POST)
+
+	if not form.is_valid():
+		return HttpResponse('Form did not pass validation. ' + form.errors)
+
 	return HttpResponse(request.session)
