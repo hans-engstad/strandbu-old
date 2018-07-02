@@ -39,11 +39,21 @@ h1, h2, h3, h4, h5, h6, p, td{
 }
 
 .default-input{
-	background-color: transparent;
+	background-color: white;
 	padding: 10px;
-	border: 0px;
+	border: 1px solid grey;
 	margin-bottom: 1px;
 	font-size: 20px;
+	width: 100%;
+}
+
+.default-input-label{
+	//line-height: 10px;
+	margin-bottom: 0px;
+}
+
+.default-input-container{
+	width: 100%;
 }
 
 .default-input-header{

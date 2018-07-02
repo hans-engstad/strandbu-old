@@ -34,7 +34,13 @@ class Contact(forms.ModelForm):
 	class Meta:
 		model = models.ContactInfo
 		fields = ('name', 'email', 'phone', 'country', 'late_arrival', 'accept_conditions')
-		widgets = {'country': CountrySelectWidget()}
+		widgets = {'country': CountrySelectWidget(
+			#layout='{widget}<div class="col"><img class="country-select-flag" id="{flag_id}" style="display: inline; margin: 6px 4px 0" src="{country.flag}"></div>'
+			layout='{widget}'
+		)}
+		labels = {
+			'name': 'Fullt navn',
+		}
 
 class Payment(forms.Form):
 	card_number = forms.CharField()

@@ -1,68 +1,68 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block body %}
 <div class="default-page-bg">
 	<div class="container">
 		<br>
-		<p class="date-header">{{ from_date }} - {{ to_date }}</p>
+		<p class="date-header">{{ booking.from_date }} - {{ booking.to_date }}</p>
 
 		<div id="content-container">
-			<form action="{% url 'charge_booking' %}" method="post" class="needs-validation">
+			<form action="{% url 'charge_booking' %}" method="POST" id="payment-form" >
 				{% csrf_token %}
-				<div class="row default-box booking-box">
-					<div class="col">
-						<span class="booking-title">{{cabin.title}} </span>
-					</div>
-					<div class="col">
-						<span class="default-link change-link">Endre</span>
-					</div>
-				</div>
-
-				<br>
-				<span id="add-cabin-link" class="center-hor">
-					<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
-				</span>
-				<br>
-
-				
-				<br>
-
-				<div class="row default-box booking-box">
-					<div class="col-1">
-						<div class="round">
-							<input type="checkbox" id="late-arrival-checkbox" />
-							<label for="late-arrival-checkbox"></label>
+				<div class="default-box">
+					<div class="row cabin-row">
+						<div class="col">
+							<span class="booking-title">{{cabin.title}} </span>
+						</div>
+						<div class="col">
+							<span class="default-link change-link">Endre</span>
 						</div>
 					</div>
-					<div class="col">
-						Sen ankomst (etter 18:00)
+					
+				</div>
+
+				<br>
+				<div class="center-hor">
+					<div>
+						<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
 					</div>
 				</div>
 
 				<br>
-
-				<div class="row default-box booking-box">
-					<div class="col-1">
-						<div class="round">
-							<input type="checkbox" class="form-control" id="conditions-checkbox" required />
-							<label for="conditions-checkbox"></label>
-							<span id="conditions-error-text" class="invalid-feedback">Du må godta prisbetingelsene</span>
+				<hr>
+				<br>
+				<div class="default-box">
+					<div class="row cabin-row">
+						<div class="col">
+							<span>Legg til ekstra informasjon</span>
+						</div>
+						<div class="col">
+							<span class="default-link change-link">Endre</span>
 						</div>
 					</div>
-					<div class="col">
-						Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span>
-					</div>
 				</div>
 
 				<br>
+				<hr>
+				<br>
+
 				<h3 class="center-hor">Betaling</h3>
 
-			    <div class="row default-box booking-box">
+			    <div class="default-box">
+			    	<br>
+			    	<div class="row center-hor" style="width: 40%;margin:auto;">
+			    		<div class="col center-ver center-hor">
+			    			<img src="http://www.credit-card-logos.com/images/multiple_credit-card-logos-1/credit_card_logos_16.gif" class="credit-card" />
+			    		</div>
+			    	</div>
+			    	<br>
 				    <div class="row">
 				        <div class="col">
 	                        <div class="form-group">
-	                            <label for="cc-number" class="control-label mb-1">Card number</label>
-	                            <input id="cc-number" name="cc-number" type="tel" class="form-control cc-number identified visa" required pattern="[0-9]{16}">
+	                            <label for="cc-number" class="control-label mb-1">{{ form.card_number.label }}</label>
+	                        	{% render_field form.card_number id="cc-number" class="form-control cc-number identified visa" %}
+	                            <!--<input id="cc-number" name="cc-number" type="tel" class="form-control cc-number identified visa" required pattern="[0-9]{16}">-->
 	                            <span class="invalid-feedback">Enter a valid 16 digit card number</span>
 	                        </div>
 	                        <div class="row">
@@ -90,11 +90,20 @@
 	                        </div>
 				        </div>
 				    </div> 
+				    <div class="row center-hor hide" id="card-error-container" >
+				    	<div class="col">
+				    		<p id="card-error-text"></p>
+				    	</div>
+				    </div>
 			    </div>
 			    <br>
 			    <div>
-			    	<button id="payment-button normal-button" type="submit" >Fullfør</button>
+			    	<button id="payment-button" class="normal-button" type="submit" >Fullfør</button>
 			    </div>
+			    <div class="hide">
+			    	{% render_field contact_form %}
+			    </div>
+			    
 			</form>
 		</div>
 	</div>

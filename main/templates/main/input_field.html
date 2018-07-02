@@ -1,0 +1,16 @@
+{% load widget_tweaks %}
+<div id="{{ id }}" class="default-input-container {{ class_name }}">
+	<p class="default-input-label">{{ field.label }}</p>
+	{% render_field field class+='default-input' %}
+</div>
+
+
+
+
+
+
+
+<!--<div id="{{ id }}" class="{{ class_name }}">
+	<p>{{ label }}</p>
+	<input type="{{ type }}" placeholder="{{ placeholder }}" value="{{ default_value }}"/>
+</div>-->

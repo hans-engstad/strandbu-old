@@ -65,6 +65,11 @@ class TentativeBooking(models.Model):
 			return False
 		return True
 
+	def get_price(self):
+		nights = len(get_dates_between(self.from_date, self.to_date))
+		cabin_price = Cabin.objects.get(number=self.cabin_number).price
+		return nights * cabin_price
+
 	@classmethod
 	def get_active_bookings(cls):
 		ids = []
@@ -75,6 +80,8 @@ class TentativeBooking(models.Model):
 
 	def __str__(self):
 		return "[" + self.cabin_number.__str__() + "] " + self.from_date.__str__() + " -> " + self.to_date.__str__() + " (" + self.created_date.__str__() + ")" + " <" + self.id.__str__() + ">"
+
+
 
 class Booking(models.Model):
 	from_date = models.DateField()

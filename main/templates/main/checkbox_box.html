@@ -1,0 +1,14 @@
+{% load widget_tweaks %}
+<div class="row contact-info-row default-box {{ class_name }}">
+	<div class="row checkbox-box">
+		<div class="col-1">
+			<div class="round">
+					{% render_field form_field id=id %}
+				<label for="{{ id }}"></label>
+			</div>
+		</div>
+		<div class="col">
+			&nbsp;&nbsp;{{ label }}
+		</div>
+	</div>
+</div>

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, redirect
-from main.forms import CabinSearch, CabinChoose, Contact
+from main import forms
 from datetime import datetime
 from main.models import BookingManager, TentativeBooking, Cabin
 from django.contrib.staticfiles.templatetags.staticfiles import static
@@ -12,7 +12,7 @@ import os
 # Create your views here.
 def Home(request):
 
-	form = CabinSearch()
+	form = forms.CabinSearch()
 	args = {'cabin_search_form': form}
 	
 	return render(request, 'main/home.html', args)
@@ -40,7 +40,7 @@ def ShowCabins(request):
 				'persons': persons}
 
 		#instantiate form
-		form = CabinSearch(data)
+		form = forms.CabinSearch(data)
 		if form.is_valid():
 
 			#Check database for search results
@@ -69,7 +69,7 @@ def ShowCabins(request):
 					'number': c.number
 				}
 
-				res['choose_form'] = CabinChoose(initial=data)	#Used to render form that will power choose cabin button
+				res['choose_form'] = forms.CabinChoose(initial=data)	#Used to render form that will power choose cabin button
 				#res['choose_form'] = CabinChoose()
 
 
@@ -95,13 +95,13 @@ def ShowCabins(request):
 
 def ContactInfo(request):
 	if request.method == 'POST':
-		chooseForm = CabinChoose(request.POST)
+		chooseForm = forms.CabinChoose(request.POST)
 		if chooseForm.is_valid():
 			#create tentative booking
 
-			from_date = chooseForm.data['from_date']
-			to_date = chooseForm.data['to_date']
-			number = chooseForm.data['number']
+			from_date = chooseForm.cleaned_data['from_date']
+			to_date = chooseForm.cleaned_data['to_date']
+			number = chooseForm.cleaned_data['number']
 
 			t_booking_id = BookingManager.create_tentative_booking(from_date, to_date, number)
 			if t_booking_id == False:
@@ -109,18 +109,18 @@ def ContactInfo(request):
 				#Consider feedback to end-user here, to avoid confusion
 				return redirect('home')
 
-			contactForm = Contact()
+			contactForm = forms.Contact()
 
 			data = chooseForm.data.copy()
 			data['t_booking_id'] = t_booking_id
-			newChooseForm = CabinChoose(data)
+			newChooseForm = forms.CabinChoose(data)
 
 			args = {'contactForm': contactForm, 'chooseForm': newChooseForm}
 
 
-			request.session['cabinChoose_num'] = newChooseForm.data['number']
-			request.session['cabinChoose_from_date'] = newChooseForm.data['from_date']
-			request.session['cabinChoose_to_date'] = newChooseForm.data['to_date']
+			#request.session['cabinChoose_num'] = newChooseForm.data['number']
+			#request.session['cabinChoose_from_date'] = newChooseForm.data['from_date']
+			#request.session['cabinChoose_to_date'] = newChooseForm.data['to_date']
 			request.session['cabinChoose_tentative_id'] = t_booking_id
 
 			return render(request, 'main/booking_contact_info.html', args)
@@ -133,46 +133,44 @@ def ContactInfo(request):
 		print("Wrong request method")
 		return redirect('home')
 
-def ConfirmBooking(request):
+def PaymentBooking(request):
 
-	contactForm = Contact(request.POST)
-	cabinChooseForm = CabinChoose(request.POST)
+	#Check if tentative booking session is expired
+	t_booking = TentativeBooking.objects.get(id=request.session['cabinChoose_tentative_id'])
+	if t_booking == None:
+		return HttpResponse('Could not find tentative booking with id')
 
-	booking_id = cabinChooseForm.data.get('t_booking_id')
-	if not booking_id:
-		return HttpResponse('Could not find tentative booking id')
+	if not t_booking.is_active():
+		return HttpResponse('Session expired')
 
+	contactForm = forms.Contact(request.POST)
 
-	booking = TentativeBooking.objects.get(id=booking_id)
-
-	if booking == None:
-		#Booking does not exist, user have not taken correct path to this view
-		return HttpResponse('Could not find booking with requested id')
-	elif not booking.is_active():
-		#Booking has expired
-		print(booking)
-		return HttpResponse('session have expired')
-	elif contactForm.is_valid() and cabinChooseForm.is_valid() and booking_id:
+	if contactForm.is_valid():
 		
-		cabin = Cabin.objects.get(number=cabinChooseForm.data.get('number'))
+		cabin = Cabin.objects.get(number=t_booking.cabin_number)
+
+		contact = contactForm.save()
+
+		# request.session['contact_id'] = contact.id
+
+		form = forms.Payment()
 
 
 
-		request.session['first_name'] = contactForm.data.get('full_name')
-		request.session['email'] = contactForm.data.get('mail')
-		request.session['phone'] = contactForm.data.get('phone')
-		request.session['country'] = contactForm.data.get('country')
-
-		args = {
-			'contactForm': contactForm,
-			'chooseForm': cabinChooseForm,
-			'from_date': cabinChooseForm.data['from_date'],
-			'to_date': cabinChooseForm.data['to_date'],
-			'cabin': cabin,
-			'stripe_pk': stripe_pk,
+		booking = {
+			'number': t_booking.cabin_number,
+			'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
+			'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
 		}
 
-		return render(request, 'main/confirm_booking.html', args)
+		args = {
+			'booking': booking,
+			'cabin': cabin,
+			'form': form,
+			'contact_form': contactForm,
+		}
+
+		return render(request, 'main/payment_booking.html', args)
 	else:
 		return HttpResponse('contactForm or cabinChooseForm did not pass validation')
 
