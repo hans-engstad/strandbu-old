@@ -83,6 +83,7 @@ class Booking(PolymorphicModel):
 			from_date_datetime = datetime.datetime.combine(_from_date, datetime.datetime.min.time())
 			from_date_datetime_tz = pytz.timezone(timezone.get_default_timezone_name()).localize(from_date_datetime)
 			if timezone.now() >= from_date_datetime_tz:
+				print(1)
 				return False
 
 			all_bookings = Booking.objects.all().select_for_update()	#will lock all bookings until the end of this transaction block
@@ -93,6 +94,7 @@ class Booking(PolymorphicModel):
 			#Check if this is a valid booking
 			for cabin in _cabins:
 				if not cabin.is_available(_from_date, _to_date):
+					print(2)
 					return False
 
 				
@@ -113,10 +115,13 @@ class Booking(PolymorphicModel):
 			try:
 				booking.full_clean()
 			except ValidationError as e:
+				print(3)
+				pritn(e)
 				return False
 
 			#Save booking
 			booking.save()
+
 
 			for cabin in _cabins:
 				booking.cabins.add(cabin)
@@ -135,10 +140,7 @@ class Booking(PolymorphicModel):
 		#Remove cabins that are booked in this timeframe
 		for booking in bookings:
 			for cabin in booking.cabins.all():
-				print(cabin)
-				print(available_cabins.__str__())
 				if cabins_match(cabin, available_cabins):
-					print("MATCH")
 					available_cabins = available_cabins.exclude(number=cabin.number)
 
 		#Exclude cabins with not enough beds
@@ -192,14 +194,9 @@ class TentativeBooking(Booking):
 		if self.cabins.count() >= 2:
 			active_time = 20
 
-		print("-----")
-		print(self)
 		
 		if timezone.now() >= self.created_date + datetime.timedelta(minutes=active_time):
-			print("FALSE")
-			print(" ")
 			return False
-		print(" ")
 		return True
 
 	def __str__(self):

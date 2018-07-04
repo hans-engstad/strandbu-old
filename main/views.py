@@ -189,8 +189,6 @@ def ChargeBooking(request):
 	if not contact_form.is_valid():
 		return HttpResponse('Contact info did not pass validation. Aborting payment')
 
-
-
 	contact = Contact.objects.create(
 		name=contact_form.cleaned_data['name'],
 		email=contact_form.cleaned_data['email'],
@@ -199,13 +197,20 @@ def ChargeBooking(request):
 		late_arrival=contact_form.cleaned_data['late_arrival'],
 	)
 
-	#Deactivate t_booking before creating new final booking
+	from_date = t_booking.from_date
+	to_date = t_booking.to_date
 
+	#Get cabins from their ids, because when deleting t_booking, queryset also updates
+	cabin_ids = list(t_booking.cabins.all().values_list('id', flat=True))
+	cabins = Cabin.objects.filter(id__in=cabin_ids)
+
+	#Deactivate t_booking before creating new final booking
+	t_booking.delete()
 
 	booking_id = Booking.create_booking(
-		t_booking.from_date,
-		t_booking.to_date,
-		t_booking.cabins.all(),
+		from_date,
+		to_date,
+		cabins,
 		True,
 		contact=contact,
 	)
