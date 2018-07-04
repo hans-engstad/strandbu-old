@@ -5,6 +5,7 @@ from django.utils import timezone
 from polymorphic.models import PolymorphicModel
 import datetime
 import pytz
+import polymorphic
 
 
 class CabinImage(models.Model):
@@ -43,7 +44,7 @@ class Cabin(models.Model):
 	def is_available(self, _from_date, _to_date):
 		bookings = Booking.get_bookings(_from_date, _to_date)
 		for booking in bookings:
-			for cabin in booking.cabins:
+			for cabin in booking.cabins.all():
 				if cabin.number == self.number:
 					return False
 		return True
@@ -52,11 +53,11 @@ class Cabin(models.Model):
 		return "[" + self.number.__str__() + "]"
 
 
-class ContactInfo(models.Model):
+class Contact(models.Model):
 	name = models.CharField(max_length=255)
-	mail = models.CharField(max_length=255)
+	email = models.CharField(max_length=255)
 	phone = models.CharField(max_length=30)
-	country = CountryField()
+	country = models.CharField(max_length=255)
 	late_arrival = models.BooleanField(default=False)
 
 
@@ -70,6 +71,8 @@ class Booking(PolymorphicModel):
 
 	created_date = models.DateTimeField(auto_now=True)
 	late_arrival = models.BooleanField(default=False)
+
+	
 
 
 	@classmethod
@@ -97,6 +100,7 @@ class Booking(PolymorphicModel):
 			booking = TentativeBooking()
 			if _is_final:
 				booking = FinalBooking()
+				booking.active = True
 
 			booking.from_date = _from_date
 			booking.to_date = _to_date
@@ -130,8 +134,11 @@ class Booking(PolymorphicModel):
 		available_cabins = Cabin.objects.all()
 		#Remove cabins that are booked in this timeframe
 		for booking in bookings:
-			for cabin in booking.cabins:
+			for cabin in booking.cabins.all():
+				print(cabin)
+				print(available_cabins.__str__())
 				if cabins_match(cabin, available_cabins):
+					print("MATCH")
 					available_cabins = available_cabins.exclude(number=cabin.number)
 
 		#Exclude cabins with not enough beds
@@ -143,23 +150,21 @@ class Booking(PolymorphicModel):
 	def get_bookings(cls, _from_date, _to_date):
 		bookings = Booking.objects.all()
 		dates_to_check = get_dates_between(_from_date, _to_date)
+
 		for booking in bookings:
 			booking_dates = get_dates_between(booking.from_date, booking.to_date)
 			if not booking.is_active():
 				bookings = bookings.exclude(id=booking.id)
 				continue
-			if dates_overlap(dates_to_check, booking_dates):
+			if not dates_overlap(dates_to_check, booking_dates):
 				bookings = bookings.exclude(id=booking.id)
+
+
 
 		return bookings
 
 	
 
-	def is_active(self):
-		if isinstance(self, TentativeBooking):
-			return self.TentativeBooking.is_active()
-		else:
-			self.FinalBooking.active
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
@@ -175,35 +180,45 @@ class Booking(PolymorphicModel):
 		cabins = cabins[:-1]
 		cabins = cabins + "]"
 		res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__() + " (" + self.created_date.__str__() + ")"
-		if isinstance(self, TentativeBooking):
-			res = res + " T"
-		else:
-			res = res + " F"
 		return res
 
 
 class TentativeBooking(Booking):
 
 	def is_active(self):
-		active_time = 20
+		active_time = 10
 
 		#Add active time if booking multiple cabins
 		if self.cabins.count() >= 2:
 			active_time = 20
 
+		print("-----")
+		print(self)
+		
 		if timezone.now() >= self.created_date + datetime.timedelta(minutes=active_time):
+			print("FALSE")
+			print(" ")
 			return False
+		print(" ")
 		return True
 
+	def __str__(self):
+		return Booking.__str__(self) + " T"
 	
 
 
 class FinalBooking(Booking):
 
 	active = models.BooleanField(default=True)
-	contact = models.ForeignKey(ContactInfo, on_delete=models.SET_NULL, null=True)
+	contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
 
+	charge_id = models.CharField(max_length=128, null=True, blank=True)
 
+	def is_active(self):
+		return self.active
+
+	def __str__(self):
+		return Booking.__str__(self) + " F"
 
 #Helper methods
 
@@ -237,12 +252,9 @@ def dates_overlap(_date1, _date2):
 				return True
 	return False
 
-def cabin_number_match(_cabin_number, _cabin_types):
-	number_is_relevant = False
+def cabins_match(_cabin, _cabin_types):
 	#check if cabin number is in cabin_types
 	for c in _cabin_types:
-		if c.number == _cabin_number:
-			number_is_relevant = True
-			break
-
-	return number_is_relevant
+		if c.number == _cabin.number:
+			return True
+	return False

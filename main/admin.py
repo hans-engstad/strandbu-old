@@ -1,25 +1,19 @@
 from django.contrib import admin
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin, PolymorphicChildModelFilter
-from main.models import Booking, Cabin, CabinImage, CabinEquipment, ContactInfo, TentativeBooking, FinalBooking
+from main.models import Booking, Cabin, CabinImage, CabinEquipment, Contact, TentativeBooking, FinalBooking
 
 # Register your models here.
 admin.site.register(Cabin)
 admin.site.register(CabinImage)
 admin.site.register(CabinEquipment)
-admin.site.register(ContactInfo)
+admin.site.register(Contact)
 
 
 
 class BookingChildAdmin(PolymorphicChildModelAdmin):
     """ Base admin class for all child models """
     base_model = Booking  # Optional, explicitly set here.
-
-    # By using these `base_...` attributes instead of the regular ModelAdmin `form` and `fieldsets`,
-    # the additional fields of the child models are automatically added to the admin form.
-    base_form = ...
-    base_fieldsets = (
-        ...
-    )
+    readonly_fields = ('created_date',)
 
 
 @admin.register(TentativeBooking)
@@ -42,6 +36,12 @@ class BookingParentAdmin(PolymorphicParentModelAdmin):
     base_model = Booking  # Optional, explicitly set here.
     child_models = (TentativeBooking, FinalBooking)
     list_filter = (PolymorphicChildModelFilter,)  # This is optional.
+
+
+
+
+
+
 
 """
 class TentativeBookingAdmin(admin.ModelAdmin):

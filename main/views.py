@@ -2,10 +2,13 @@ from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, redirect
 from main import forms
 from datetime import datetime
-from main.models import Booking, Cabin, TentativeBooking
+from main.models import Booking, Cabin, TentativeBooking, Contact
 from django.contrib.staticfiles.templatetags.staticfiles import static
-from strandbu.settings.dev import STRIPE_TEST_PUBLIC_KEY as stripe_pk
+from strandbu.settings import dev as settings
+from django_countries import countries
 import os
+import json
+import stripe
 
 
 
@@ -76,8 +79,6 @@ def ShowCabins(request):
 
 			if cabins.count() == 0:
 				info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
-			
-			print(cabins_dict)
 
 			args = {'cabins' : cabins_dict, 'from_date' : from_date, 'to_date': to_date, 'info_header': info_header}
 
@@ -146,23 +147,92 @@ def BookingOverview(request):
 		't_booking': t_booking_info, 'info_form': forms.PreChargeInfoForm()
 	}
 
-	print(request.POST)
-
-	print(t_booking)
-
 	return render(request, 'main/booking_overview.html', args)
 
 
 def ChargeBooking(request):
+
+	# print(request.POST)
 
 	if not request.method == 'POST':
 		return HttpResponse('Request method must be POST.')
 
 	form = forms.ChargeForm(request.POST)
 
-	print(request.POST)
-
 	if not form.is_valid():
-		return HttpResponse('Form did not pass validation. ' + form.errors)
+		print(form.errors)
+		return HttpResponse("Payment form did not pass validation. Aborting payment. Booking not created.")
 
-	return HttpResponse(request.session)
+	data = form.cleaned_data
+
+	price = data['total_price']
+	phone = data['phone']
+	t_booking_id = data['t_booking_id']
+	t_booking = TentativeBooking.objects.get(id=t_booking_id)
+
+	if t_booking == None:
+		return HttpResponse("Unable to find tentative booking. Aborting payment.")
+
+	token = data['token']
+	token_data = json.loads(token)
+
+	contact_data = {
+		'name': token_data['card']['name'],
+		'email': token_data['email'],
+		'phone': phone,
+		'country': token_data['card']['address_country'],
+		'late_arrival': data['late_arrival']
+	}
+
+	contact_form = forms.ContactForm(contact_data)
+
+	if not contact_form.is_valid():
+		return HttpResponse('Contact info did not pass validation. Aborting payment')
+
+
+
+	contact = Contact.objects.create(
+		name=contact_form.cleaned_data['name'],
+		email=contact_form.cleaned_data['email'],
+		phone=contact_form.cleaned_data['phone'],
+		country=contact_form.cleaned_data['country'],
+		late_arrival=contact_form.cleaned_data['late_arrival'],
+	)
+
+	#Deactivate t_booking before creating new final booking
+
+
+	booking_id = Booking.create_booking(
+		t_booking.from_date,
+		t_booking.to_date,
+		t_booking.cabins.all(),
+		True,
+		contact=contact,
+	)
+
+	if booking_id == False:
+		return HttpResponse('Unable to create booking. Aborting payment')
+
+
+	booking = Booking.objects.get(id=booking_id)
+
+	stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
+	charge = stripe.Charge.create(
+		amount = data['total_price'],
+		currency = 'nok',
+		description = 'Hytte booking',
+		source = token_data['id'],
+		metadata = {'booking_id': booking_id},
+	)
+
+	booking.charge_id = charge.id
+	booking.save()
+
+
+
+	return redirect('booking_confirmation')
+	
+
+def BookingConfirmation(request):
+	return render(request, 'main/booking_confirmation.html')

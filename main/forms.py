@@ -32,22 +32,11 @@ class CabinChoose(forms.Form):
 	)
 
 
-class Contact(forms.ModelForm):
-
-	email = forms.CharField(required=False)
-	late_arrival = forms.BooleanField(required=False)
-	accept_conditions = forms.BooleanField(required=True)
+class ContactForm(forms.ModelForm):
 
 	class Meta:
-		model = models.ContactInfo
-		fields = ('name', 'email', 'phone', 'country', 'late_arrival', 'accept_conditions')
-		widgets = {'country': CountrySelectWidget(
-			#layout='{widget}<div class="col"><img class="country-select-flag" id="{flag_id}" style="display: inline; margin: 6px 4px 0" src="{country.flag}"></div>'
-			layout='{widget}'
-		)}
-		labels = {
-			'name': 'Fullt navn',
-		}
+		model = models.Contact
+		fields = ('name', 'email', 'phone', 'country', 'late_arrival')
 
 class PreChargeInfoForm(forms.Form):
 	phone = forms.IntegerField()
@@ -57,3 +46,10 @@ class PreChargeInfoForm(forms.Form):
 class ChargeForm(forms.Form):
 	token = forms.CharField()
 	t_booking_id = forms.CharField()
+
+	total_price = forms.IntegerField()
+	phone = forms.IntegerField()
+	late_arrival = forms.BooleanField()
+
+
+

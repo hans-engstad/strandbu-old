@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block body %}
+
+
+<div class="default-page-bg">
+	<div class="container">
+		<br>
+		<div class="center-hor">
+			<img src="{% static 'images/checkmark.png' %}" id="checkmark" />
+		</div>
+		<h3 class="center-hor">Bestilling vellykket</h3>
+		<p class="center-hor" >Bekreftelse er sendt til din mail</p>
+	</div>
+</div>
+
+{% endblock %}

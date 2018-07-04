@@ -1,0 +1,7 @@
+/* line 4, staticfiles/scss/booking/booking_confirmation.scss */
+#checkmark {
+  display: block;
+  max-width: 230px;
+  max-height: 75px;
+  width: auto;
+  height: auto; }
