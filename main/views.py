@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, redirect
 from main import forms
 from datetime import datetime
-from main.models import BookingManager, TentativeBooking, Cabin
+from main.models import Booking, Cabin, TentativeBooking
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from strandbu.settings.dev import STRIPE_TEST_PUBLIC_KEY as stripe_pk
 import os
@@ -42,14 +42,13 @@ def ShowCabins(request):
 		#instantiate form
 		form = forms.CabinSearch(data)
 		if form.is_valid():
-
 			#Check database for search results
 
 			from_date = form.cleaned_data['from_date']
 			to_date = form.cleaned_data['to_date']
 			persons = form.cleaned_data['persons']
 
-			cabins = BookingManager.get_available_cabins(from_date, to_date, persons)
+			cabins = Booking.get_available_cabins(from_date, to_date, persons)
 
 			cabins_dict = {}
 			for c in cabins:
@@ -61,17 +60,15 @@ def ShowCabins(request):
 				res['long_description'] = c.long_description
 				res['equipment'] = c.equipment.all().values_list('eqp', flat=True)
 				res['images'] = c.images.all().values_list('img', flat=True) 
-				res['price'] = c.price
+				res['price_kr'] = c.price_kr
 
-				data = {
+				cabin_choose_data = {
 					'from_date': from_date,
 					'to_date': to_date,
-					'number': c.number
+					'cabin_numbers': c.number,
 				}
 
-				res['choose_form'] = forms.CabinChoose(initial=data)	#Used to render form that will power choose cabin button
-				#res['choose_form'] = CabinChoose()
-
+				res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
 
 				cabins_dict['cabin_' + c.number.__str__()] = res
 
@@ -93,72 +90,30 @@ def ShowCabins(request):
 	else:
 		return redirect('home')
 
-def ContactInfo(request):
-	if request.method == 'POST':
-		chooseForm = forms.CabinChoose(request.POST)
-		if chooseForm.is_valid():
-			#create tentative booking
-
-			from_date = chooseForm.cleaned_data['from_date']
-			to_date = chooseForm.cleaned_data['to_date']
-			number = chooseForm.cleaned_data['number']
-
-			t_booking_id = BookingManager.create_tentative_booking(from_date, to_date, number)
-			if t_booking_id == False:
-				#Cabin no longer available, try again
-				#Consider feedback to end-user here, to avoid confusion
-				return redirect('home')
-
-			contactForm = forms.Contact()
-
-			data = chooseForm.data.copy()
-			data['t_booking_id'] = t_booking_id
-			newChooseForm = forms.CabinChoose(data)
-
-			args = {'contactForm': contactForm, 'chooseForm': newChooseForm}
-
-
-			#request.session['cabinChoose_num'] = newChooseForm.data['number']
-			#request.session['cabinChoose_from_date'] = newChooseForm.data['from_date']
-			#request.session['cabinChoose_to_date'] = newChooseForm.data['to_date']
-			request.session['cabinChoose_tentative_id'] = t_booking_id
-
-			return render(request, 'main/booking_contact_info.html', args)
-		else:
-			print("Choose form did not pass validation")
-			print(chooseForm.errors)
-			return redirect('home')
-
-	else:
-		print("Wrong request method")
-		return redirect('home')
-
 def BookingOverview(request):
 	if not request.method == 'POST':
 		return HttpResponse('Request method must be POST.')
 
-	chooseForm = forms.CabinChoose(request.POST)
-	if not chooseForm.is_valid():
-		return HttpResponse('Choose form did not pass validation')
+	choose_form = forms.CabinChoose(request.POST)
+	if not choose_form.is_valid():
+		return HttpResponse('Choose form did not pass validation: ' + choose_form.errors.__str__())
 	
-	t_booking_id
-	if chooseForm.cleaned_data['t_booking_id'] == -1:
+	t_booking_id = choose_form.cleaned_data['t_booking_id']
+	if t_booking_id == -1:
+
 		#create tentative booking
+		from_date = choose_form.cleaned_data['from_date']
+		to_date = choose_form.cleaned_data['to_date']
 
-		from_date = chooseForm.cleaned_data['from_date']
-		to_date = chooseForm.cleaned_data['to_date']
-		number = chooseForm.cleaned_data['number']
+		numbers = list(map(int, choose_form.cleaned_data['cabin_numbers'].split(',')))
+		cabins = Cabin.objects.filter(number__in=numbers)
 
-		t_booking_id = BookingManager.create_tentative_booking(from_date, to_date, number)
+		t_booking_id = Booking.create_booking(from_date, to_date, cabins, False)
 		if t_booking_id == False:
 			#Cabin no longer available, try again
 			#Consider feedback to end-user here, to avoid confusion
 			#Or redirect to cabin show page, with choose form.
 			return redirect('home')
-		
-	else:
-		#Tentative booking already exist
-		t_booking_id = chooseForm.cleaned_data['t_booking_id']
 
 	#Current tentative booking
 	t_booking = TentativeBooking.objects.get(id=t_booking_id)
@@ -172,10 +127,15 @@ def BookingOverview(request):
 		return HttpResponse('Session expired')
 
 
-	payment_form = forms.Payment()
+	cabins = {}
+	for c in t_booking.cabins.all():
+		cabins['cabin_' + c.number.__str__()] = {
+			'number': c.number,
+			'title': c.title,
+		}
 
 	t_booking_info = {
-		'number': t_booking.cabin_number,
+		'cabins': cabins,
 		'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
 		'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
 		'price': t_booking.get_price(),
@@ -183,10 +143,14 @@ def BookingOverview(request):
 	}
 
 	args = {
-		't_booking': t_booking_info,
+		't_booking': t_booking_info, 'info_form': forms.PreChargeInfoForm()
 	}
 
-	return render(request, 'main/payment_booking.html', args)
+	print(request.POST)
+
+	print(t_booking)
+
+	return render(request, 'main/booking_overview.html', args)
 
 
 def ChargeBooking(request):
@@ -195,6 +159,8 @@ def ChargeBooking(request):
 		return HttpResponse('Request method must be POST.')
 
 	form = forms.ChargeForm(request.POST)
+
+	print(request.POST)
 
 	if not form.is_valid():
 		return HttpResponse('Form did not pass validation. ' + form.errors)

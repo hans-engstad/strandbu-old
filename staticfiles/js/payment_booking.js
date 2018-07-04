@@ -18,12 +18,28 @@ var handler = StripeCheckout.configure({
     var tokenString = JSON.stringify(token);
     $('#token').val(tokenString);
 
+    //Set value of phone and arraving-late fields
+    $('#phone-field').val($('#id_phone').val());
+    $('#late-arrival-field').val($('#late-arrival-checkbox').val());
+
     //Submit form
     $('#payment-form').submit();
   }
 });
 
 $('#payment-button').on('click', function(e){
+  //Check if conditions checkbox is ticked
+  if(!$('#accept-conditions-checkbox').is(":checked"))
+  {
+    $('#conditions-error').removeClass('hide');
+  }
+  else
+  {
+    $('#conditions-error').addClass('hide');
+  }
+});
+
+$('#info-form').on('submit', function(e){
   e.preventDefault();
 
   // Open Checkout with further options:

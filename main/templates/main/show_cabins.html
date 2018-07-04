@@ -83,10 +83,14 @@
 										</div>
 										<div class="col-6 center-content">
 											<div class="choose-cabin-container">
-												<h4 class="cabin-price">{{ cabin.price }} kr</h4>
+												<h4 class="cabin-price">{{ cabin.price_kr }} kr</h4>
 												<p class="cabin-per-night-text">per natt</p>
-
-												<button style="" class="normal-button choose-cabin-button" onClick="chooseCabin({{ cabin.number }})">Velg hytte</button>
+												<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
+													{% csrf_token %}
+													{{ cabin.choose_form_single }}
+													<button type="submit" class="normal-button choose-cabin-button">Velg hytte</button>
+												</form>
+												
 											</div>
 										</div>
 									</div>
@@ -94,10 +98,7 @@
 							</div>
 						</div>
 				</div>
-				<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'contact_info' %}">
-					{% csrf_token %}
-					{{ cabin.choose_form }}
-				</form>
+				
 				
 			{% endfor %}
 		</div>

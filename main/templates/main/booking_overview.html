@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block body %}
+<div class="default-page-bg">
+	<div class="container">
+		<br>
+		<p class="date-header">{{ t_booking.from_date }} - {{ t_booking.to_date }}</p>
+
+		<div id="content-container">
+			<form action="" method="POST" id="info-form" >
+				{% csrf_token %}
+				{% for key, cabin in t_booking.cabins.items %}
+					<div class="default-box">
+						<div class="row cabin-row">
+							<div class="col">
+								<span class="booking-title">{{cabin.title}} </span>
+							</div>
+							<div class="col">
+								<span class="default-link change-link">Endre</span>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+
+				<br>
+				<div class="center-hor">
+					<div>
+						<i id="add-cabin-plus" class="fas fa-plus"></i>Legg til hytte
+					</div>
+				</div>
+
+				<br>
+				<hr>
+				<br>
+
+				<h3 class="center-hor" >Opplysninger</h3>
+				<br>
+
+				<div class="">
+					<div class="row center-hor">
+						<div class="col-5">
+							<span class="center-hor" style="white-space:nowrap;">Mobilnummer (uten landskode):</span>
+							{% render_field info_form.phone class="default-input" %}
+						</div>
+					</div>
+					
+				</div>
+
+				<br>
+
+				{% include 'main/checkbox_box.html' with id='late-arrival-checkbox' label='Sen ankomst (etter 18:00)' form_field=info_form.late_arrival class_name='col-8' %}
+				<br>
+
+				{% include 'main/checkbox_box.html' with id='accept-conditions-checkbox' label='Jeg har lest og godtatt <span class="default-link">prisbetingelsene</span><p id="conditions-error" class="hide">&nbsp;&nbsp;Du må godta prisbetingelsene våre</p>' form_field=info_form.accept_conditions class_name='col-8' %}
+				<br>
+
+				<div class="default-box">
+					<div class="row cabin-row">
+						<div class="col">
+							<span>Legg til ekstra informasjon</span>
+						</div>
+						<div class="col">
+							<span class="default-link change-link">Endre</span>
+						</div>
+					</div>
+				</div>
+
+				<br>
+				<hr>
+				<br>
+				
+			    <div>
+			    	<button id="payment-button" class="normal-button" >Fullfør</button>
+			    </div>
+			</form>
+		</div>
+	</div>
+
+	<form id="payment-form" action="{% url 'charge_booking' %}" method="POST" >
+		{% csrf_token %}
+		<input id="phone-field" name="phone" type="hidden" />
+		<input id="late-arrival-field" name="late_arrival" type="hidden" />
+
+		<input name="t_booking_id" value="{{ t_booking.id }}" type="hidden" />
+		<input id="TOTAL-PRICE" name="total_price" type="hidden" value="{{ t_booking.price }}" type="hidden" />
+		<input id="token" name="token" type="hidden" />
+	</form>
+
+
+	
+
+	
+
+
+
+</div>
+{% endblock %}

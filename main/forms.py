@@ -10,16 +10,21 @@ class CabinSearch(forms.Form):
 	persons = forms.IntegerField();
 
 
+#Form used when creating tentative booking
+class TentativeBookingForm(forms.Form):
+
+	# cabin_number = forms.IntegerField(widget=forms.HiddenInput())
+	t_booking_id = forms.IntegerField(widget=forms.HiddenInput(), initial=-1, required=False)
+
+	from_date = forms.DateField(widget=forms.HiddenInput())
+	to_date = forms.DateField(widget=forms.HiddenInput())
+    
+
 class CabinChoose(forms.Form):
-	from_date = forms.DateField(
-		widget=forms.HiddenInput()
-	)
-	to_date = forms.DateField(
-		widget=forms.HiddenInput()
-	)
-	number = forms.IntegerField(
-		widget=forms.HiddenInput()
-	)
+	from_date = forms.DateField(widget=forms.HiddenInput())
+	to_date = forms.DateField(widget=forms.HiddenInput())
+	cabin_numbers = forms.CharField(widget=forms.HiddenInput())
+
 	t_booking_id = forms.IntegerField(
 		widget=forms.HiddenInput(),
 		required=False,
@@ -44,10 +49,10 @@ class Contact(forms.ModelForm):
 			'name': 'Fullt navn',
 		}
 
-class Payment(forms.Form):
-	card_number = forms.CharField()
-	cvc = forms.CharField()
-	expire_date = forms.CharField()
+class PreChargeInfoForm(forms.Form):
+	phone = forms.IntegerField()
+	late_arrival = forms.BooleanField(required=False)
+	accept_conditions = forms.BooleanField(required=True)
 
 class ChargeForm(forms.Form):
 	token = forms.CharField()
