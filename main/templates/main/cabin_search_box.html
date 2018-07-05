@@ -1,34 +1,34 @@
-<div id="search-cabin-box">
-	<h4 class="default-sub-header">Hytte</h4>
-	<div class="container search-cabin-form">
+{% load widget_tweaks %}
+
+
+<div class="container search-cabin-form" style="background-color: white;" >
+	<form id="search-cabin-form" method="POST" action="{% url 'show_cabins' %}" style="width: 100%" autocomplete="off">
+		{% csrf_token %}
 		<div class="row">
-			<div id="from-date" class="search-cabin-form-inputgroup col-sm">
-				<span class="semilight-color serach-cabin-field-header">Innsjekk</span>
-				<br>
-				<input onkeydown="return false;" id="from-date-field" class="search-cabin-input hide-cursor">
+			<div id="daterange-picker" class="input-group input-daterange" style="width: 50%">
+				<div class="row" style="margin-left: 5px; margin-right: 5px;">
+					<div id="from_date" class="col-sm search-cabin-form-inputgroup">
+						<span class="semilight-color serach-cabin-field-header from_date">Innsjekk</span>
+						<br>
+						{% render_field form.from_date class="search-cabin-input form-control" id="from-date-field" %}
+					</div>
+					<div id="to-date" class="col-sm search-cabin-form-inputgroup">
+						<span class="semilight-color serach-cabin-field-header to_date">Utsjekk</span>
+						<br>
+						{% render_field form.to_date class="search-cabin-input form-control" id="to-date-field" %}
+					</div>
+				</div>
 			</div>
-			<div id="to-date" class="col-sm search-cabin-form-inputgroup">
-				<span class="semilight-color serach-cabin-field-header">Utsjekk</span>
-				<br>
-				<input onkeydown="return false;" id="to-date-field" class="search-cabin-input hide-cursor">
-			</div>
-			<div id="persons" class="col-sm search-cabin-form-inputgroup">
+
+			
+			<div id="persons" class="col search-cabin-form-inputgroup">
 				<span id="persons-header" class="semilight-color serach-cabin-field-header">Antall gjester</span>
 				<br>
-				<input id="persons-input" class="search-cabin-input col-sm hide-cursor" placeholder="1">
+				{% render_field form.persons id="persons-input" class="search-cabin-input col-sm" value="1" %}
 			</div>
-			<div id="search-button-container" class="col-sm">
-				<button id="search-button" class="normal-button" onClick="submitSearch()"><span class="glyphicon glyphicon-search"></span> Søk</button>
+			<div id="search-button-container" class="col">
+				<button id="search-button" class="normal-button" type="submit" ><span class="glyphicon glyphicon-search"></span> Søk</button>
 			</div>
-			<form id="search-cabin-form" method="POST" action="{% url 'show_cabins' %}">
-				{% csrf_token %}
-				<input id="from-date-field-form" name="from-date" class="hide">
-				<input id="to-date-field-form" name="to-date" class="hide">
-				<input id="person-amount-form" name="persons" class="hide">
-			</form>
 		</div>
-	</div>
-	<br>
-	<p id="contact-info">Ta kontakt for bestilling av camping med bobil, campingvogn eller telt.</p>
-	<p id="phone-layout"><i class="fas fa-phone"></i> {% include 'constants/phone_number.html'%}</p>
+	</form>
 </div>

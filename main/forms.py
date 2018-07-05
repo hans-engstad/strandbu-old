@@ -5,8 +5,8 @@ import datetime
 from . import models
 
 class CabinSearch(forms.Form):
-	from_date = forms.DateField()
-	to_date = forms.DateField()
+	from_date = forms.CharField()
+	to_date = forms.CharField()
 	persons = forms.IntegerField();
 
 
@@ -21,8 +21,8 @@ class TentativeBookingForm(forms.Form):
     
 
 class CabinChoose(forms.Form):
-	from_date = forms.DateField(widget=forms.HiddenInput())
-	to_date = forms.DateField(widget=forms.HiddenInput())
+	from_date = forms.CharField(widget=forms.HiddenInput())
+	to_date = forms.CharField(widget=forms.HiddenInput())
 	cabin_numbers = forms.CharField(widget=forms.HiddenInput())
 
 	t_booking_id = forms.IntegerField(

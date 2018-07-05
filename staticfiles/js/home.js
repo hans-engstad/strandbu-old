@@ -1,4 +1,16 @@
-//FROM DATE
+
+
+$('#daterange-picker').datepicker({
+    format: 'dd.mm.yy',
+    startDate: '+2d',
+    weekStart: 1,
+    maxViewMode: 0,
+    orientation: 'bottom',
+    container: '#daterange-picker'
+});
+
+
+/*//FROM DATE
 $('#from-date-field').datepicker({
     format: 'dd.mm.yy',
     startDate: '+1d',
@@ -34,7 +46,7 @@ $( "#to-date" ).click(function() {
 	$('#to-date-field').data("datepicker").show();
 });
 
-
+*/
 
 
 $('#persons-input').click(function(){
@@ -45,8 +57,8 @@ $('#persons-header').click(function(){
 });
 
 function setup(){
-	datepickersSetup();
-	personAmountSetup();
+	// datepickersSetup();
+	// personAmountSetup();
 }
 
 function datepickersSetup(){

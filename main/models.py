@@ -72,7 +72,7 @@ class Booking(PolymorphicModel):
 	created_date = models.DateTimeField(auto_now=True)
 	late_arrival = models.BooleanField(default=False)
 
-	
+	active = models.BooleanField(default=True)
 
 
 	@classmethod
@@ -108,8 +108,14 @@ class Booking(PolymorphicModel):
 			booking.to_date = _to_date
 			
 			
-			if _is_final:
-				booking.contact = kwargs.get("contact")
+			if 'contact' in kwargs:
+				booking.contact = kwargs.get('contact')
+				
+			if 'charge_id' in kwargs:
+				booking.charge_id = kwargs.get('charge_id')
+
+			if 'late_arrival' in kwargs:
+				booking.late_arrival = kwargs.get('late_arrival')
 
 			#Validate booking fields
 			try:
@@ -122,7 +128,6 @@ class Booking(PolymorphicModel):
 			#Save booking
 			booking.save()
 
-
 			for cabin in _cabins:
 				booking.cabins.add(cabin)
 
@@ -130,6 +135,24 @@ class Booking(PolymorphicModel):
 
 			#Return id of the booking created
 			return booking.id
+
+
+	@classmethod
+	def create_booking_from_tentative(cls, _t_booking, _contact, _charge_id):
+		
+		from_date = _t_booking.from_date
+		to_date = _t_booking.to_date
+		contact = _contact
+		charge_id = _charge_id
+		late_arrival = _t_booking.late_arrival
+
+		cabin_ids = list(_t_booking.cabins.all().values_list('id', flat=True))
+		cabins = Cabin.objects.filter(id__in=cabin_ids)
+
+		_t_booking.delete()
+
+		return Booking.create_booking(from_date, to_date, cabins, True, contact=contact, charge_id=charge_id, late_arrival=late_arrival)
+
 
 	@classmethod
 	def get_available_cabins(cls, _from_date, _to_date, _persons):
@@ -160,9 +183,6 @@ class Booking(PolymorphicModel):
 				continue
 			if not dates_overlap(dates_to_check, booking_dates):
 				bookings = bookings.exclude(id=booking.id)
-
-
-
 		return bookings
 
 	
@@ -181,32 +201,33 @@ class Booking(PolymorphicModel):
 			cabins = cabins + c.number.__str__() + ","
 		cabins = cabins[:-1]
 		cabins = cabins + "]"
-		res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__() + " (" + self.created_date.__str__() + ")"
+		# res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__() + " (" + self.created_date.__str__() + ")"
+		res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__()
 		return res
 
 
 class TentativeBooking(Booking):
 
 	def is_active(self):
+		if not self.active:
+			return False
 		active_time = 10
 
 		#Add active time if booking multiple cabins
 		if self.cabins.count() >= 2:
 			active_time = 20
-
 		
 		if timezone.now() >= self.created_date + datetime.timedelta(minutes=active_time):
 			return False
 		return True
 
 	def __str__(self):
-		return Booking.__str__(self) + " T"
+		return Booking.__str__(self) + " T" + " (" + self.id.__str__() + ")"
 	
 
 
 class FinalBooking(Booking):
 
-	active = models.BooleanField(default=True)
 	contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
 
 	charge_id = models.CharField(max_length=128, null=True, blank=True)
@@ -215,7 +236,7 @@ class FinalBooking(Booking):
 		return self.active
 
 	def __str__(self):
-		return Booking.__str__(self) + " F"
+		return Booking.__str__(self) + " F" + " (" + self.id.__str__() + ")"
 
 #Helper methods
 
@@ -225,10 +246,10 @@ def get_dates_between(_from_date, _to_date):
 		return None
 
 	if isinstance(_from_date, str):
-		_from_date = datetime.datetime.strptime(_from_date, '%Y-%m-%d') 
+		_from_date = datetime.datetime.strptime(_from_date, '%Y-%m-%d %H:%M:%S') 
 
 	if isinstance(_to_date, str):
-		_to_date = datetime.datetime.strptime(_to_date, '%Y-%m-%d')
+		_to_date = datetime.datetime.strptime(_to_date, '%Y-%m-%d %H:%M:%S')
 
 	dates_to_check = []
 	temp_date = _from_date
@@ -245,7 +266,7 @@ def dates_overlap(_date1, _date2):
 	#note date1 and date2 are arrays
 	for d1 in _date1:
 		for d2 in _date2:
-			if d1 == d2:
+			if d1.day == d2.day and d1.month == d2.month and d1.year == d2.year:
 				return True
 	return False
 

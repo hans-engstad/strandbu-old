@@ -1,0 +1,82 @@
+/* line 3, staticfiles/scss/booking/show_cabins.scss */
+#date-header {
+  text-align: center;
+  font-weight: 500;
+  text-decoration: underline; }
+
+/* line 9, staticfiles/scss/booking/show_cabins.scss */
+#info-header {
+  text-align: center;
+  font-weight: 700; }
+
+/* line 15, staticfiles/scss/booking/show_cabins.scss */
+.cabin-search-result {
+  padding: 5px;
+  width: 60%;
+  margin: auto; }
+
+/* line 22, staticfiles/scss/booking/show_cabins.scss */
+.cabin-result-img {
+  width: 100%;
+  box-shadow: 1px 1px 1px grey; }
+
+/* line 27, staticfiles/scss/booking/show_cabins.scss */
+.cabin-result-label {
+  background-color: white;
+  border: 1px solid grey;
+  padding: 10px;
+  margin-bottom: 5px;
+  box-shadow: 1px 1px 1px grey; }
+  /* line 35, staticfiles/scss/booking/show_cabins.scss */
+  .cabin-result-label:hover {
+    cursor: pointer; }
+
+/* line 41, staticfiles/scss/booking/show_cabins.scss */
+.cabin-result-label-header:hover {
+  cursor: pointer; }
+
+/* line 46, staticfiles/scss/booking/show_cabins.scss */
+.cabin-result-content {
+  border: 1px solid grey;
+  border-top: 0px;
+  margin-bottom: 10px;
+  padding: 40px;
+  background-color: #E4E8F6;
+  box-shadow: 1px 1px 1px grey; }
+
+/* line 57, staticfiles/scss/booking/show_cabins.scss */
+.more-link {
+  line-height: 0%; }
+
+/* line 65, staticfiles/scss/booking/show_cabins.scss */
+.img-slide-button-region {
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 10%; }
+
+/* line 71, staticfiles/scss/booking/show_cabins.scss */
+.eqp-data {
+  white-space: nowrap; }
+
+/* line 76, staticfiles/scss/booking/show_cabins.scss */
+.choose-cabin-button {
+  padding: 10px;
+  width: 100%;
+  text-align: center; }
+
+/* line 83, staticfiles/scss/booking/show_cabins.scss */
+.choose-cabin-container {
+  background-color: #F1F1F1;
+  padding: 10px;
+  width: 90%; }
+
+/* line 89, staticfiles/scss/booking/show_cabins.scss */
+.cabin-price {
+  text-align: center;
+  color: #3A8437; }
+
+/* line 94, staticfiles/scss/booking/show_cabins.scss */
+.cabin-per-night-text {
+  text-align: center;
+  font-size: 14px;
+  color: #505050;
+  line-height: 0px; }

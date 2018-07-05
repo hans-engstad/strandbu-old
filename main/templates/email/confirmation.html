@@ -1,0 +1,19 @@
+{% load static %}
+<style type="text/css">
+	p,h1 {
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	}
+</style>
+<div style="margin: auto; text-align: center;">
+	<h1>Strandbu Camping - Bekreftelse</h1>
+	<p>{{ from_date }} - {{ to_date }}</p>
+
+	<img style="width: 100px;" src="{% static 'images/checkmark.png' %}"/>
+	<p>Dette er en bekreftelse på følgende bestilling:</p>
+	{% for t in cabin_titles %}
+	<p>- {{ t }}</p>
+	{% endfor %}
+
+	<p>Vi ønsker deg velkommen til oss!</p>
+	<p>Denne mailen kan ikke besvares, ta kontakt på post@strandbu.no for videre hendvendelser.</p>
+</div>

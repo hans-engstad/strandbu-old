@@ -1,0 +1,10 @@
+Strandbu Camping - Bekreftelse
+{{ from_date }} - {{ to_date }}
+Dette er en bekreftelse på følgende bestilling
+{% for t in cabin_titles %}
+- {{ t }}
+{% endfor %}
+
+Vi ønsker deg velkommen til oss!
+
+Denne mailen kan ikke besvares, ta kontakt på post@strandbu.no for videre hendvendelser.

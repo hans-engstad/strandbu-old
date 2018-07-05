@@ -9,7 +9,12 @@
 		<div class="container">
 			<h2 class="default-header">Bestilling</h2>
 			<div id="search-cabin-container" class="container">
-				{% include 'main/cabin_search_box.html'%}
+				<div id="search-cabin-box">
+					<h4 class="default-sub-header">Hytte</h4>
+					{% include 'main/cabin_search_box.html' with form=cabin_search_form %}
+					<br>
+					<p id="contact-info">Ta kontakt for bestilling av camping med bobil, campingvogn eller telt.</p>
+					<p id="phone-layout"><i class="fas fa-phone"></i> {% include 'constants/phone_number.html'%}</p>
 			</div>
 		</div>
 	</div>
