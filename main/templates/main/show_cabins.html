@@ -6,13 +6,22 @@
 	<div class="container">
 
 		<br>
+		
+		<div class="cabin-search-result row">
+			<div class="col"></div>
+			<div class="col center-hor">
+				<span style="text-decoration: underline;">{{ from_date_str }} - {{ to_date_str }}</span> 
+			</div>
+			<div class="col center-hor">
+				<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
+			</div>
+
+			
+			
+		</div>
+
 		<div id="search-box" class="cabin-search-result hide">
 			{% include 'main/cabin_search_box.html' with form=cabin_search_form %}
-		</div>
-		<div class="cabin-search-result center-hor">
-			<span style="text-decoration: underline;">{{ from_date_str }} - {{ to_date_str }}</span> 
-			&nbsp;&nbsp;&nbsp;
-			<span class="default-link">Endre søk</span>
 		</div>
 
 		{% if info_header != "" %}

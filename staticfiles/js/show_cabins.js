@@ -9,3 +9,15 @@ function showCabin(number){
 	$('#cabin-result-label-' + number).addClass("hide");
 	$('#cabin-result-content-' + number).removeClass("hide");
 }
+
+function ChangeSearchShow(){
+	$('#search-box').removeClass("hide");
+	$('#change-search-link').html("Skjul endre søk")
+	$('#change-search-link').attr("onClick", 'ChangeSearchHide()');
+}
+
+function ChangeSearchHide(){
+	$('#search-box').addClass("hide");
+	$('#change-search-link').html("Endre søk")
+	$('#change-search-link').attr("onClick", 'ChangeSearchShow()');
+}

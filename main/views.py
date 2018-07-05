@@ -18,6 +18,12 @@ import stripe
 # Create your views here.
 def Home(request):
 
+	if 't_booking_id' in request.session:
+		b = Booking.objects.filter(id=request.session['t_booking_id'])
+		if len(b) >= 1:
+			b.delete()
+		request.session['t_booking_id'] = None
+	
 	form = forms.CabinSearch()
 	args = {'cabin_search_form': form}
 	

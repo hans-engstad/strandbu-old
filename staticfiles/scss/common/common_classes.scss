@@ -19,6 +19,13 @@ h1, h2, h3, h4, h5, h6, p, td{
 	top: -10px;
 }
 
+#nav-logo{
+
+	&:hover{
+		cursor: pointer; 
+	}
+}
+
 .default-box{
 	border: 1px solid $default-box-border-color;
 	padding: 10px;
@@ -102,8 +109,11 @@ h1, h2, h3, h4, h5, h6, p, td{
 
 	&:hover{
 		cursor: pointer;
+		color: #3A8437;
 	}
 }
+
+
 
 .default-page-bg{
 	background-color: $home-page-bg-color;
