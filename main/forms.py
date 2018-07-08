@@ -23,7 +23,7 @@ class TentativeBookingForm(forms.Form):
 class CabinChoose(forms.Form):
 	from_date = forms.CharField(widget=forms.HiddenInput())
 	to_date = forms.CharField(widget=forms.HiddenInput())
-	cabin_numbers = forms.CharField(widget=forms.HiddenInput())
+	cabin_number = forms.CharField(widget=forms.HiddenInput())
 
 	t_booking_id = forms.IntegerField(
 		widget=forms.HiddenInput(),
@@ -33,6 +33,8 @@ class CabinChoose(forms.Form):
 
 
 class ContactForm(forms.ModelForm):
+
+	late_arrival = forms.BooleanField(widget=forms.HiddenInput(), required=False)
 
 	class Meta:
 		model = models.Contact
@@ -49,7 +51,7 @@ class ChargeForm(forms.Form):
 
 	total_price = forms.IntegerField()
 	phone = forms.IntegerField()
-	late_arrival = forms.BooleanField()
+	late_arrival = forms.BooleanField(required=False)
 
 
 

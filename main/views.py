@@ -33,16 +33,18 @@ def Home(request):
 
 # @never_cache
 def ShowCabins(request):
-	if 't_booking_id' in request.session:
-		b = Booking.objects.filter(id=request.session['t_booking_id'])
-		if len(b) >= 1:
-			b.delete()
-		request.session['t_booking_id'] = None
+
+	if not 'booking_action' in request.POST:
+		if 't_booking_id' in request.session:
+			b = Booking.objects.filter(id=request.session['t_booking_id'])
+			if len(b) >= 1:
+				b.delete()
+			request.session['t_booking_id'] = None
 
 
 	if not request.method == 'POST':
-		print(1)
 		return redirect('home')
+
 
 	#get fields
 	from_date_field = request.POST.get('from_date')
@@ -52,8 +54,6 @@ def ShowCabins(request):
 	#check that all fields was passed in the request
 	if from_date_field == None or to_date_field == None or persons == None:
 		return HttpResponse("Missing one or more post fields.")
-	
-
 	
 
 	data = {'from_date': from_date_field,
@@ -74,6 +74,13 @@ def ShowCabins(request):
 
 		cabins = Booking.get_available_cabins(from_date, to_date, persons)
 
+		t_booking_id = -1
+		if 'booking_action' in request.POST:
+			if request.POST.get('booking_action') == 'add_cabin':
+				t_booking_id = request.POST.get('t_booking_id')
+				# t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+
+
 		cabins_dict = {}
 		for c in cabins:
 			res = {}
@@ -86,11 +93,19 @@ def ShowCabins(request):
 			res['images'] = c.images.all().values_list('img', flat=True) 
 			res['price_kr'] = c.price_kr
 
+			# cabin_numbers = c.number.__str__()
+			"""if not t_booking == None:
+				cabin_numbers = ""
+				for cabin in t_booking.cabins.all():
+					cabin_numbers = cabin.number.__str__() + ","
+				cabin_numbers = cabin_numbers + c.number.__str__()
+			"""
 
 			cabin_choose_data = {
 				'from_date': form.cleaned_data['from_date'],
 				'to_date': form.cleaned_data['to_date'],
-				'cabin_numbers': c.number.__str__(),
+				'cabin_number': c.number.__str__(),
+				't_booking_id': t_booking_id,
 			}
 
 			res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
@@ -106,6 +121,7 @@ def ShowCabins(request):
 
 		from_date_str = datetime.strftime(from_date, "%d.%m.%y")
 		to_date_str = datetime.strftime(to_date, "%d.%m.%y")
+
 
 		args = {
 			'cabins' : cabins_dict, 
@@ -134,10 +150,12 @@ def BookingOverview(request):
 	
 	t_booking_id = choose_form.cleaned_data['t_booking_id']
 
+	"""
 	if 't_booking_id' in request.session:
 		tmp_id = request.session['t_booking_id']
 		if not TentativeBooking.objects.filter(id=tmp_id).first() == None:
 			t_booking_id = tmp_id
+	"""
 
 	if t_booking_id == -1:
 
@@ -145,15 +163,25 @@ def BookingOverview(request):
 		from_date = datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y")
 		to_date = datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y")
 
-		numbers = list(map(int, choose_form.cleaned_data['cabin_numbers'].split(',')))
-		cabins = Cabin.objects.filter(number__in=numbers)
+		number = choose_form.cleaned_data['cabin_number']
+		cabin = Cabin.objects.filter(number=number)
 
-		t_booking_id = Booking.create_booking(from_date, to_date, cabins, False)
+		t_booking_id = Booking.create_booking(from_date, to_date, cabin, False)
 		if t_booking_id == False:
 			#Cabin no longer available, try again
 			#Consider feedback to end-user here, to avoid confusion
 			#Or redirect to cabin show page, with choose form.
 			return redirect('home')
+	else:
+		#t_booking already exist, add cabin to this booking
+		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+		
+		number = choose_form.cleaned_data['cabin_number']
+		cabin = Cabin.objects.filter(number=number).first()
+
+		t_booking.cabins.add(cabin)
+		t_booking.save()
+
 
 	#Current tentative booking
 	t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
@@ -184,10 +212,14 @@ def BookingOverview(request):
 		'id': t_booking.id,
 	}
 
+	print(request.POST)
 
+	cabin_search_form = forms.CabinSearch(request.POST)
+	if not cabin_search_form.is_valid():
+		return HttpResponse("Cabin search form is not valid")
 
 	args = {
-		't_booking': t_booking_info, 'info_form': forms.PreChargeInfoForm()
+		't_booking': t_booking_info, 'info_form': forms.PreChargeInfoForm(), 'cabin_search_form': cabin_search_form,
 	}
 
 	return render(request, 'main/booking_overview.html', args)
@@ -237,32 +269,9 @@ def ChargeBooking(request):
 		email=contact_form.cleaned_data['email'],
 		phone=contact_form.cleaned_data['phone'],
 		country=contact_form.cleaned_data['country'],
-		late_arrival=contact_form.cleaned_data['late_arrival'],
 	)
 
-	#from_date = t_booking.from_date
-	#to_date = t_booking.to_date
-
-	#Get cabins from their ids, because when deleting t_booking, queryset also updates
-	#cabin_ids = list(t_booking.cabins.all().values_list('id', flat=True))
-	#cabins = Cabin.objects.filter(id__in=cabin_ids)
-
-
-	# booking_id = Booking.create_booking(
-	# 	from_date,
-	# 	to_date,
-	# 	cabins,
-	# 	True,
-	# 	contact=contact,
-	# )
-
-	# if booking_id == False:
-	# 	return HttpResponse('Unable to create booking. Aborting payment')
-
-
-
 	stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
-
 
 	#if unable to create charge, HTTP error will be raised by stripe.
 	charge = stripe.Charge.create(
@@ -281,12 +290,22 @@ def ChargeBooking(request):
 		return HttpResponse("Fatal error. Booking payed for but not reserved")
 
 	booking = Booking.objects.get(id=booking_result)
+	
+	#Add late_arrival on booking
+	booking.late_arrival = contact_form.cleaned_data['late_arrival']
+	booking.save()
+
+	print("----------------")
+	print(contact_form.cleaned_data['late_arrival'])
+	print(request.POST)
+
+	#Send confirmation mail 
+
 	cabins = booking.cabins.all()
 	titles = []
 	for cabin in cabins:
 		titles.append(cabin.title)
 
-	#Send confirmation mail 
 	data = {
 		'from_date': booking.from_date.strftime('%d.%m.%Y'),
 		'to_date': booking.to_date.strftime('%d.%m.%Y'),

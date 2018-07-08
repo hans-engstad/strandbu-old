@@ -1,4 +1,11 @@
 
+
+
+function AddCabin(){
+  $('#add-cabin-form').submit();
+}
+
+
 var handler = StripeCheckout.configure({
   key: 'pk_test_sAnddD1C8K3Nv4QefeGpEBiS',
   image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
@@ -20,7 +27,11 @@ var handler = StripeCheckout.configure({
 
     //Set value of phone and arraving-late fields
     $('#phone-field').val($('#id_phone').val());
-    $('#late-arrival-field').val($('#late-arrival-checkbox').val());
+
+    if($('#late-arrival-checkbox:checked'))
+    {
+      $('#late-arrival-field').prop('checked', true); 
+    }
 
     //Submit form
     $('#payment-form').submit();

@@ -105,9 +105,11 @@
 												<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
 													{% csrf_token %}
 													{{ cabin.choose_form_single }}
+													<div class="hide">
+														{{ cabin_search_form }}
+													</div>
 													<button type="submit" class="normal-button choose-cabin-button">Velg hytte</button>
 												</form>
-												
 											</div>
 										</div>
 									</div>

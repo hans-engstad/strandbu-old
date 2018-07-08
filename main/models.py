@@ -58,7 +58,7 @@ class Contact(models.Model):
 	email = models.CharField(max_length=255)
 	phone = models.CharField(max_length=30)
 	country = models.CharField(max_length=255)
-	late_arrival = models.BooleanField(default=False)
+	# late_arrival = models.BooleanField(default=False)
 
 
 
