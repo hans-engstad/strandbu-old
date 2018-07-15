@@ -52,6 +52,7 @@ class ChargeForm(forms.Form):
 	total_price = forms.IntegerField()
 	phone = forms.IntegerField()
 	late_arrival = forms.BooleanField(required=False)
+	t_booking_JSON = forms.CharField()
 
 
 

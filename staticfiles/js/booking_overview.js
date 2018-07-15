@@ -34,7 +34,7 @@ var handler = StripeCheckout.configure({
     }
 
     //Submit form
-    $('#payment-form').submit();
+    document.getElementById('payment-form').submit();
   }
 });
 

@@ -26,6 +26,11 @@ h1, h2, h3, h4, h5, h6, p, td{
 	}
 }
 
+#alert-div{
+	margin-top: $navbar-height;
+	margin-bottom: 0px;
+}
+
 .hover-pointer{
 	&:hover{
 		cursor: pointer;

@@ -6,6 +6,8 @@ from polymorphic.models import PolymorphicModel
 import datetime
 import pytz
 import polymorphic
+import json
+
 
 
 class CabinImage(models.Model):
@@ -91,10 +93,12 @@ class Booking(PolymorphicModel):
 			#Get all bookings with given dates and active
 			bookings = Booking.get_bookings(_from_date, _to_date)
 
+			print(_cabins)
 			#Check if this is a valid booking
 			for cabin in _cabins:
 				if not cabin.is_available(_from_date, _to_date):
 					print(2)
+					print(cabin.__str__())
 					return False
 
 				
@@ -155,7 +159,7 @@ class Booking(PolymorphicModel):
 
 
 	@classmethod
-	def get_available_cabins(cls, _from_date, _to_date, _persons):
+	def get_available_cabins(cls, _from_date, _to_date, _persons, **kwargs):
 		#Get bookings that overlap with given dates and are active
 		bookings = cls.get_bookings(_from_date, _to_date)
 
@@ -168,6 +172,16 @@ class Booking(PolymorphicModel):
 
 		#Exclude cabins with not enough beds
 		available_cabins = available_cabins.filter(persons__gte=_persons)
+
+		#Add cabins from t_booking session (if any)
+		if 't_booking' in kwargs:
+			t_booking = kwargs.get('t_booking')
+			if not t_booking == None:
+				if t_booking.is_active():
+					available_cabins = (available_cabins | t_booking.cabins.all()).distinct()
+
+						
+
 
 		return available_cabins
 
@@ -185,8 +199,17 @@ class Booking(PolymorphicModel):
 				bookings = bookings.exclude(id=booking.id)
 		return bookings
 
-	
-
+	"""
+	@classmethod
+	def compare_fields(cls, _obj1, _obj2, _field_names):
+		#Return false if not all fields match
+		for field_name in _field_names:
+			field1 = getattr(_obj1, field_name)
+			field2 = getattr(_obj2, field_name)
+			if not field1 == field2:
+				return False
+		return True
+	"""	
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
@@ -195,29 +218,32 @@ class Booking(PolymorphicModel):
 			price = price + (cabin.price * nights)
 		return price
 
+
 	def __str__(self):
 		cabins ="["
 		for c in self.cabins.all():
 			cabins = cabins + c.number.__str__() + ","
 		cabins = cabins[:-1]
 		cabins = cabins + "]"
-		# res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__() + " (" + self.created_date.__str__() + ")"
 		res = cabins + " " + self.from_date.__str__() + " -> " + self.to_date.__str__()
 		return res
 
 
+
+
 class TentativeBooking(Booking):
+
+	last_updated_time = models.DateTimeField(auto_now=True)
+
+	def set_updated_time_now(self):
+		self.last_updated_time = timezone.now()
 
 	def is_active(self):
 		if not self.active:
 			return False
-		active_time = 10
-
-		#Add active time if booking multiple cabins
-		if self.cabins.count() >= 2:
-			active_time = 20
+		idle_max_time = 1
 		
-		if timezone.now() >= self.created_date + datetime.timedelta(minutes=active_time):
+		if timezone.now() >= self.last_updated_time + datetime.timedelta(minutes=idle_max_time):
 			return False
 		return True
 

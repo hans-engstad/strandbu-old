@@ -86,6 +86,8 @@
 			<input id="t_booking_id" name="t_booking_id" value="{{ t_booking.id }}" type="hidden" />
 			<input id="TOTAL-PRICE" name="total_price" type="hidden" value="{{ t_booking.price }}" type="hidden" />
 			<input id="token" name="token" type="hidden" />
+			<input name="t_booking_JSON" value="{{ t_booking.JSON }}" />
+			{{ cabin_search_form }}
 		</form>
 		<form id="add-cabin-form" action="{% url 'show_cabins' %}" method="POST" >
 			{% csrf_token %}

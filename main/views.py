@@ -12,35 +12,26 @@ from django.views.decorators.cache import never_cache
 import os
 import json
 import stripe
+from . import serializers
+from rest_framework.renderers import JSONRenderer
+from django.utils.six import BytesIO
+from rest_framework.parsers import JSONParser
+import ast
 
 
 
 # Create your views here.
 def Home(request):
-
-	if 't_booking_id' in request.session:
-		b = Booking.objects.filter(id=request.session['t_booking_id'])
-		if len(b) >= 1:
-			b.delete()
-		request.session['t_booking_id'] = None
 	
 	form = forms.CabinSearch()
 	args = {'cabin_search_form': form}
-	
+
+	args = add_message(request, args)
+
 	return render(request, 'main/home.html', args)
 
 
-
-# @never_cache
 def ShowCabins(request):
-
-	if not 'booking_action' in request.POST:
-		if 't_booking_id' in request.session:
-			b = Booking.objects.filter(id=request.session['t_booking_id'])
-			if len(b) >= 1:
-				b.delete()
-			request.session['t_booking_id'] = None
-
 
 	if not request.method == 'POST':
 		return redirect('home')
@@ -72,7 +63,12 @@ def ShowCabins(request):
 		if from_date >= to_date:
 			return HttpResponse("Checkout must be after checkin.")
 
-		cabins = Booking.get_available_cabins(from_date, to_date, persons)
+		t_booking = None
+		if not 'booking_action' in request.POST:
+			if 't_booking_id' in request.session:
+				t_booking = Booking.objects.filter(id=request.session['t_booking_id']).first()
+
+		cabins = Booking.get_available_cabins(from_date, to_date, persons, t_booking=t_booking)
 
 		t_booking_id = -1
 		if 'booking_action' in request.POST:
@@ -92,14 +88,6 @@ def ShowCabins(request):
 			res['equipment'] = c.equipment.all().values_list('eqp', flat=True)
 			res['images'] = c.images.all().values_list('img', flat=True) 
 			res['price_kr'] = c.price_kr
-
-			# cabin_numbers = c.number.__str__()
-			"""if not t_booking == None:
-				cabin_numbers = ""
-				for cabin in t_booking.cabins.all():
-					cabin_numbers = cabin.number.__str__() + ","
-				cabin_numbers = cabin_numbers + c.number.__str__()
-			"""
 
 			cabin_choose_data = {
 				'from_date': form.cleaned_data['from_date'],
@@ -131,6 +119,8 @@ def ShowCabins(request):
 			'to_date_str': to_date_str,
 		}
 
+		args = add_message(request, args)
+
 		return render(request, 'main/show_cabins.html', args)
 	else:
 		print(form.errors)
@@ -139,26 +129,34 @@ def ShowCabins(request):
 		return HttpResponse("Input did not pass form validation")
 
 		
-@never_cache
+# @never_cache
 def BookingOverview(request):
-	if not request.method == 'POST':
-		return HttpResponse('Request method must be POST.')
-
-	choose_form = forms.CabinChoose(request.POST)
-	if not choose_form.is_valid():
-		return HttpResponse('Choose form did not pass validation: ' + choose_form.errors.__str__())
+	#Id of t_booking, -1 if nothing (Also default value in choose_form)
+	t_booking_id = -1
 	
-	t_booking_id = choose_form.cleaned_data['t_booking_id']
-
-	"""
+	#Find session t_booking if any
 	if 't_booking_id' in request.session:
 		tmp_id = request.session['t_booking_id']
-		if not TentativeBooking.objects.filter(id=tmp_id).first() == None:
-			t_booking_id = tmp_id
-	"""
+		t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
+		if not t_booking == None:
+			if t_booking.is_active():
+				t_booking_id = tmp_id
+	elif not request.method == 'POST':
+		return HttpResponse('Request method must be POST.')
+
+	#Instantiate cabin choose form
+	choose_form = forms.CabinChoose(request.POST)
+
+	if choose_form.is_valid():
+		#Note: Form field will override session if not -1
+		t_booking_id_form = choose_form.cleaned_data['t_booking_id']
+		if not t_booking_id_form == -1:
+			t_booking_id = t_booking_id_form
+
 
 	if t_booking_id == -1:
-
+		if not choose_form.is_valid():
+			return HttpResponse("Choose form did not pass validation" + choose_form.errors.__str__())
 		#create tentative booking
 		from_date = datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y")
 		to_date = datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y")
@@ -173,14 +171,16 @@ def BookingOverview(request):
 			#Or redirect to cabin show page, with choose form.
 			return redirect('home')
 	else:
-		#t_booking already exist, add cabin to this booking
+		#t_booking already exist
 		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
 		
-		number = choose_form.cleaned_data['cabin_number']
-		cabin = Cabin.objects.filter(number=number).first()
+		#add cabin to this booking if choose form is valid
+		if choose_form.is_valid():
+			number = choose_form.cleaned_data['cabin_number']
+			cabin = Cabin.objects.filter(number=number).first()
 
-		t_booking.cabins.add(cabin)
-		t_booking.save()
+			t_booking.cabins.add(cabin)
+			t_booking.save()
 
 
 	#Current tentative booking
@@ -193,7 +193,6 @@ def BookingOverview(request):
 	#Check if tentative booking session is expired
 	if not t_booking.is_active():
 		return HttpResponse('Session expired')
-
 
 	cabins = {}
 	for c in t_booking.cabins.all():
@@ -210,24 +209,32 @@ def BookingOverview(request):
 		'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
 		'price': t_booking.get_price(),
 		'id': t_booking.id,
+		'JSON': serializers.TentativeBookingSerializer(t_booking).data,
 	}
 
-	print(request.POST)
 
+	#Define Cabin Search Form. Used when adding new cabin
 	cabin_search_form = forms.CabinSearch(request.POST)
+	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
+		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
+
 	if not cabin_search_form.is_valid():
 		return HttpResponse("Cabin search form is not valid")
 
 	args = {
-		't_booking': t_booking_info, 'info_form': forms.PreChargeInfoForm(), 'cabin_search_form': cabin_search_form,
+		't_booking': t_booking_info, 
+		'info_form': forms.PreChargeInfoForm(), 
+		'cabin_search_form': cabin_search_form, 
 	}
+
+	args = add_message(request, args)
+
+	
 
 	return render(request, 'main/booking_overview.html', args)
 
 
 def ChargeBooking(request):
-
-	# print(request.POST)
 
 	if not request.method == 'POST':
 		return HttpResponse('Request method must be POST.')
@@ -243,10 +250,35 @@ def ChargeBooking(request):
 	price = data['total_price']
 	phone = data['phone']
 	t_booking_id = data['t_booking_id']
-	t_booking = TentativeBooking.objects.get(id=t_booking_id)
+	t_booking = TentativeBooking.objects.get(id=t_booking_id)	#TODO: We might not find this booking!
+	
+	JSON_data = ast.literal_eval(data['t_booking_JSON'])
+	t_booking_JSON = serializers.TentativeBookingSerializer(t_booking).data
+
+	#Check that JSON t_booking matches t_booking
+	field_names = ['id', 'from_date','to_date', 'cabins', 'created_date', 'active']
+	if not JSON_data == t_booking_JSON:
+		#Fields do not match, redirect to booking overview with updated booking
+		request.session['t_booking_id'] = t_booking_id
+
+		cabin_search_form = forms.CabinSearch(request.POST)
+		if not cabin_search_form.is_valid():
+			return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
+		
+		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+
+		request.session['message_starter'] = "OBS!"
+		# request.session['message'] = "Session not updated. Payment not completed. Please try again."
+		request.session['message'] = "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen."
+		request.session['message_type'] = "danger"
+
+		return redirect('booking_overview')
+
 
 	if t_booking == None:
 		return HttpResponse("Unable to find tentative booking. Aborting payment.")
+
+	#Check that price displayed matches t_booking price
 
 	token = data['token']
 	token_data = json.loads(token)
@@ -275,13 +307,12 @@ def ChargeBooking(request):
 
 	#if unable to create charge, HTTP error will be raised by stripe.
 	charge = stripe.Charge.create(
-		amount = data['total_price'],
+		amount = t_booking.get_price(),
 		currency = 'nok',
 		description = 'Hytte booking',
 		source = token_data['id'],
 		#metadata = {'booking_id': booking_id},
 	)
-
 
 	booking_result = Booking.create_booking_from_tentative(t_booking, contact, charge.id)
 	if booking_result == False:
@@ -294,10 +325,6 @@ def ChargeBooking(request):
 	#Add late_arrival on booking
 	booking.late_arrival = contact_form.cleaned_data['late_arrival']
 	booking.save()
-
-	print("----------------")
-	print(contact_form.cleaned_data['late_arrival'])
-	print(request.POST)
 
 	#Send confirmation mail 
 
@@ -323,9 +350,26 @@ def ChargeBooking(request):
 		html_message=msg_html,
 	)
 
-
 	return redirect('booking_confirmation')
 	
 
 def BookingConfirmation(request):
-	return render(request, 'main/booking_confirmation.html')
+
+	args = {}
+	args = add_message(request, args)
+
+	return render(request, 'main/booking_confirmation.html', args)
+
+
+def add_message(request, _args):
+	if 'message' in request.session:
+		_args['message'] = request.session['message']
+		request.session['message'] = None
+	if 'message_type' in request.session:
+		_args['message_type'] = request.session['message_type']
+		request.session['message_type'] = None
+	if 'message_starter' in request.session:
+		_args['message_starter'] = request.session['message_starter']
+		request.session['message_starter'] = None
+
+	return _args
