@@ -199,18 +199,6 @@ class Booking(PolymorphicModel):
 				bookings = bookings.exclude(id=booking.id)
 		return bookings
 
-	"""
-	@classmethod
-	def compare_fields(cls, _obj1, _obj2, _field_names):
-		#Return false if not all fields match
-		for field_name in _field_names:
-			field1 = getattr(_obj1, field_name)
-			field2 = getattr(_obj2, field_name)
-			if not field1 == field2:
-				return False
-		return True
-	"""	
-
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
 		price = 0
@@ -246,6 +234,13 @@ class TentativeBooking(Booking):
 		if timezone.now() >= self.last_updated_time + datetime.timedelta(minutes=idle_max_time):
 			return False
 		return True
+
+	def create_active_copy(self):
+		return Booking.create_booking(self.from_date, self.to_date, self.cabins.all(), False)
+
+	def deactivate(self):
+		self.active = False
+		self.save()
 
 	def __str__(self):
 		return Booking.__str__(self) + " T" + " (" + self.id.__str__() + ")"

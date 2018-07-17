@@ -33,32 +33,18 @@ def Home(request):
 
 def ShowCabins(request):
 
-	if not request.method == 'POST':
-		return redirect('home')
+	cabin_search_form = forms.CabinSearch(request.POST)
+	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
+		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
+	elif not request.method == 'POST':
+		return HttpResponse('Request method must be POST.')
 
-
-	#get fields
-	from_date_field = request.POST.get('from_date')
-	to_date_field = request.POST.get('to_date')
-	persons  = request.POST.get('persons')
-	
-	#check that all fields was passed in the request
-	if from_date_field == None or to_date_field == None or persons == None:
-		return HttpResponse("Missing one or more post fields.")
-	
-
-	data = {'from_date': from_date_field,
-			'to_date': to_date_field,
-			'persons': persons}
-
-	#instantiate form
-	form = forms.CabinSearch(data)
-	if form.is_valid():
+	if cabin_search_form.is_valid():
 		#Check database for search results
 
-		from_date = datetime.strptime(form.cleaned_data['from_date'], "%d.%m.%y")
-		to_date = datetime.strptime(form.cleaned_data['to_date'], "%d.%m.%y")
-		persons = form.cleaned_data['persons']
+		from_date = datetime.strptime(cabin_search_form.cleaned_data['from_date'], "%d.%m.%y")
+		to_date = datetime.strptime(cabin_search_form.cleaned_data['to_date'], "%d.%m.%y")
+		persons = cabin_search_form.cleaned_data['persons']
 
 		if from_date >= to_date:
 			return HttpResponse("Checkout must be after checkin.")
@@ -74,7 +60,10 @@ def ShowCabins(request):
 		if 'booking_action' in request.POST:
 			if request.POST.get('booking_action') == 'add_cabin':
 				t_booking_id = request.POST.get('t_booking_id')
-				# t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+		elif not t_booking == None:
+			#Deactivate t_booking if we are not adding cabin. 
+			t_booking.deactivate()
+			request.session['t_booking_id'] = None
 
 
 		cabins_dict = {}
@@ -90,8 +79,8 @@ def ShowCabins(request):
 			res['price_kr'] = c.price_kr
 
 			cabin_choose_data = {
-				'from_date': form.cleaned_data['from_date'],
-				'to_date': form.cleaned_data['to_date'],
+				'from_date': cabin_search_form.cleaned_data['from_date'],
+				'to_date': cabin_search_form.cleaned_data['to_date'],
 				'cabin_number': c.number.__str__(),
 				't_booking_id': t_booking_id,
 			}
@@ -113,7 +102,7 @@ def ShowCabins(request):
 
 		args = {
 			'cabins' : cabins_dict, 
-			'cabin_search_form': form, 
+			'cabin_search_form': cabin_search_form, 
 			'info_header': info_header, 
 			'from_date_str': from_date_str, 
 			'to_date_str': to_date_str,
@@ -123,7 +112,7 @@ def ShowCabins(request):
 
 		return render(request, 'main/show_cabins.html', args)
 	else:
-		print(form.errors)
+		print(cabin_search_form.errors)
 		#TODO: kan sende en redirect til home page, der error meldigen blir sendt med og vises frem 
 		#	på det spesifiserte feltet
 		return HttpResponse("Input did not pass form validation")
@@ -250,8 +239,42 @@ def ChargeBooking(request):
 	price = data['total_price']
 	phone = data['phone']
 	t_booking_id = data['t_booking_id']
-	t_booking = TentativeBooking.objects.get(id=t_booking_id)	#TODO: We might not find this booking!
+	t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()	#TODO: We might not find this booking!
 	
+	if t_booking == None:
+		cabin_search_form = forms.CabinSearch(request.POST)
+		if not cabin_search_form.is_valid():
+			return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
+		
+		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+
+		request.session['message_starter'] = "OBS!"
+		request.session['message'] = "Sesjon utløpt. Betaling ikke fullført. Vennligst prøv igjen."
+		request.session['message_type'] = "danger"
+
+		return redirect('show_cabins')
+
+	if not t_booking.is_active():
+		#Try to re activate t_booking and redirect to booking overview
+		t_booking_id = t_booking.create_active_copy()
+		if t_booking_id == False:
+			#Redirect with alert (Booking no longer valid)
+			cabin_search_form = forms.CabinSearch(request.POST)
+			if not cabin_search_form.is_valid():
+				return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
+			
+			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+
+			request.session['message_starter'] = "OBS!"
+			request.session['message'] = "Sesjon utløpt. Betaling ikke fullført. Vennligst prøv igjen."
+			request.session['message_type'] = "danger"
+
+			return redirect('show_cabins')
+
+		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+
+
+
 	JSON_data = ast.literal_eval(data['t_booking_JSON'])
 	t_booking_JSON = serializers.TentativeBookingSerializer(t_booking).data
 
@@ -373,3 +396,4 @@ def add_message(request, _args):
 		request.session['message_starter'] = None
 
 	return _args
+
