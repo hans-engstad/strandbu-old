@@ -26,8 +26,6 @@ def Home(request):
 	form = forms.CabinSearch()
 	args = {'cabin_search_form': form}
 
-	request.session = add_alert(request, 'test1')
-	request.session = add_alert(request, 'test2')
 	args = add_alerts_from_session(request, args)
 
 
@@ -181,7 +179,7 @@ def BookingOverview(request):
 		if t_booking_id == False:
 			#Booking no longer valid, redirect to show_cabins	
 			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-			request = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
+			request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
 
 			return redirect('show_cabins')
 	else:
@@ -194,7 +192,7 @@ def BookingOverview(request):
 			if not t_booking_id:
 				#Unable to create copy-booking
 				request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-				request = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
+				request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
 
 				return redirect('show_cabins')
 
@@ -206,13 +204,13 @@ def BookingOverview(request):
 			cabin = Cabin.objects.filter(number=number).first()
 
 			if cabin in t_booking.cabins.all():
-				request = add_alert(request, 'Valgt hytte er allerede lagt til. Bruk "Legg til hytte" knappen for å legge til flere.', type='primary')
+				request.session = add_alert(request, 'Valgt hytte er allerede lagt til. Bruk "Legg til hytte" knappen for å legge til flere.', type='primary')
 			elif not cabin.is_available(t_booking.from_date, t_booking.to_date):
 				#Cabin no longer avilable, try finding equivalent cabin
 				eq_cabin = cabin.get_available_eq_cabin()
 				if not eq_cabin:
 					#No eq-cabins are available
-					request = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen', type='primary')
+					request.session = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen', type='primary')
 					request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 					return redirect('show_cabins')
 				cabin = eq_cabin
@@ -291,7 +289,7 @@ def ChargeBooking(request):
 		
 		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-		request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 		return redirect('show_cabins')
 
@@ -306,7 +304,7 @@ def ChargeBooking(request):
 			
 			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-			request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+			request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 			return redirect('show_cabins')
 
@@ -330,7 +328,7 @@ def ChargeBooking(request):
 		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
 		# request.session['message'] = "Session not updated. Payment not completed. Please try again."
-		request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 		return redirect('booking_overview')
 
