@@ -6,7 +6,7 @@ $z-index: (
 );
 
 #cover-photo{
-	//margin-top: $navbar-height;
+	// margin-top: $navbar-height;
 	max-width: 100%;
 	z-index: map-get($z-index, photo);
 }

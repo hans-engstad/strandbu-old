@@ -51,6 +51,13 @@ class Cabin(models.Model):
 					return False
 		return True
 
+	def get_available_eq_cabins(self):
+		for cabin in self.equivalent_cabins.all():
+			if cabin.is_available():
+				return cabin
+		return False
+
+
 	def __str__(self):
 		return "[" + self.number.__str__() + "]"
 

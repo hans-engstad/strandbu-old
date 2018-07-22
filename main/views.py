@@ -26,12 +26,16 @@ def Home(request):
 	form = forms.CabinSearch()
 	args = {'cabin_search_form': form}
 
-	args = add_message(request, args)
+	request.session = add_alert(request, 'test1')
+	request.session = add_alert(request, 'test2')
+	args = add_alerts_from_session(request, args)
+
 
 	return render(request, 'main/home.html', args)
 
-
+# @never_cache
 def ShowCabins(request):
+
 
 	cabin_search_form = forms.CabinSearch(request.POST)
 	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
@@ -49,21 +53,20 @@ def ShowCabins(request):
 		if from_date >= to_date:
 			return HttpResponse("Checkout must be after checkin.")
 
+		
 		t_booking = None
-		if not 'booking_action' in request.POST:
-			if 't_booking_id' in request.session:
-				t_booking = Booking.objects.filter(id=request.session['t_booking_id']).first()
-
-		cabins = Booking.get_available_cabins(from_date, to_date, persons, t_booking=t_booking)
-
 		t_booking_id = -1
 		if 'booking_action' in request.POST:
 			if request.POST.get('booking_action') == 'add_cabin':
 				t_booking_id = request.POST.get('t_booking_id')
-		elif not t_booking == None:
+		elif 't_booking_id' in request.session:
 			#Deactivate t_booking if we are not adding cabin. 
-			t_booking.deactivate()
+			t_booking = Booking.objects.filter(id=request.session['t_booking_id']).first()
+			if not t_booking == None:
+				t_booking.deactivate()
 			request.session['t_booking_id'] = None
+
+		cabins = Booking.get_available_cabins(from_date, to_date, persons, t_booking=t_booking)
 
 
 		cabins_dict = {}
@@ -78,11 +81,17 @@ def ShowCabins(request):
 			res['images'] = c.images.all().values_list('img', flat=True) 
 			res['price_kr'] = c.price_kr
 
+			action = 'single_cabin'
+
+			if 'booking_action' in request.POST:
+				action = request.POST['booking_action']
+
 			cabin_choose_data = {
 				'from_date': cabin_search_form.cleaned_data['from_date'],
 				'to_date': cabin_search_form.cleaned_data['to_date'],
 				'cabin_number': c.number.__str__(),
 				't_booking_id': t_booking_id,
+				'action': action,
 			}
 
 			res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
@@ -108,7 +117,7 @@ def ShowCabins(request):
 			'to_date_str': to_date_str,
 		}
 
-		args = add_message(request, args)
+		args = add_alerts_from_session(request, args)
 
 		return render(request, 'main/show_cabins.html', args)
 	else:
@@ -120,27 +129,42 @@ def ShowCabins(request):
 		
 # @never_cache
 def BookingOverview(request):
+	
+	#Define Cabin Search Form. Used when adding new cabin
+	cabin_search_form = forms.CabinSearch(request.POST)
+	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
+		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
+
+	if not cabin_search_form.is_valid():
+		return HttpResponse("Cabin search form is not valid")
+
 	#Id of t_booking, -1 if nothing (Also default value in choose_form)
 	t_booking_id = -1
-	
-	#Find session t_booking if any
-	if 't_booking_id' in request.session:
-		tmp_id = request.session['t_booking_id']
-		t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
-		if not t_booking == None:
-			if t_booking.is_active():
-				t_booking_id = tmp_id
-	elif not request.method == 'POST':
-		return HttpResponse('Request method must be POST.')
 
 	#Instantiate cabin choose form
 	choose_form = forms.CabinChoose(request.POST)
 
 	if choose_form.is_valid():
-		#Note: Form field will override session if not -1
-		t_booking_id_form = choose_form.cleaned_data['t_booking_id']
-		if not t_booking_id_form == -1:
-			t_booking_id = t_booking_id_form
+		
+
+		action = choose_form.cleaned_data['action']
+		if action == 'add_cabin':
+			#Find session t_booking if any
+			if 't_booking_id' in request.session:
+				tmp_id = request.session['t_booking_id']
+				t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
+				if not t_booking == None:
+					if t_booking.is_active():
+						t_booking_id = tmp_id
+
+			#Note: Form field will override session if not -1
+			t_booking_id_form = choose_form.cleaned_data['t_booking_id']
+			if not t_booking_id_form == -1:
+				t_booking_id = t_booking_id_form
+		else:
+			t_booking_id = -1
+			deactivate_session_t_booking(request)
+
 
 
 	if t_booking_id == -1:
@@ -155,18 +179,43 @@ def BookingOverview(request):
 
 		t_booking_id = Booking.create_booking(from_date, to_date, cabin, False)
 		if t_booking_id == False:
-			#Cabin no longer available, try again
-			#Consider feedback to end-user here, to avoid confusion
-			#Or redirect to cabin show page, with choose form.
-			return redirect('home')
+			#Booking no longer valid, redirect to show_cabins	
+			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+			request = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
+
+			return redirect('show_cabins')
 	else:
 		#t_booking already exist
 		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
 		
+		if not t_booking.is_active():
+			#Booking expired, try creating new
+			t_booking_id = t_booking.create_active_copy()
+			if not t_booking_id:
+				#Unable to create copy-booking
+				request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+				request = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
+
+				return redirect('show_cabins')
+
+			t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+
 		#add cabin to this booking if choose form is valid
 		if choose_form.is_valid():
 			number = choose_form.cleaned_data['cabin_number']
 			cabin = Cabin.objects.filter(number=number).first()
+
+			if cabin in t_booking.cabins.all():
+				request = add_alert(request, 'Valgt hytte er allerede lagt til. Bruk "Legg til hytte" knappen for å legge til flere.', type='primary')
+			elif not cabin.is_available(t_booking.from_date, t_booking.to_date):
+				#Cabin no longer avilable, try finding equivalent cabin
+				eq_cabin = cabin.get_available_eq_cabin()
+				if not eq_cabin:
+					#No eq-cabins are available
+					request = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen', type='primary')
+					request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+					return redirect('show_cabins')
+				cabin = eq_cabin
 
 			t_booking.cabins.add(cabin)
 			t_booking.save()
@@ -202,13 +251,7 @@ def BookingOverview(request):
 	}
 
 
-	#Define Cabin Search Form. Used when adding new cabin
-	cabin_search_form = forms.CabinSearch(request.POST)
-	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
-		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
-
-	if not cabin_search_form.is_valid():
-		return HttpResponse("Cabin search form is not valid")
+	
 
 	args = {
 		't_booking': t_booking_info, 
@@ -216,7 +259,7 @@ def BookingOverview(request):
 		'cabin_search_form': cabin_search_form, 
 	}
 
-	args = add_message(request, args)
+	args = add_alerts_from_session(request, args)
 
 	
 
@@ -248,9 +291,7 @@ def ChargeBooking(request):
 		
 		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-		request.session['message_starter'] = "OBS!"
-		request.session['message'] = "Sesjon utløpt. Betaling ikke fullført. Vennligst prøv igjen."
-		request.session['message_type'] = "danger"
+		request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 		return redirect('show_cabins')
 
@@ -265,9 +306,7 @@ def ChargeBooking(request):
 			
 			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-			request.session['message_starter'] = "OBS!"
-			request.session['message'] = "Sesjon utløpt. Betaling ikke fullført. Vennligst prøv igjen."
-			request.session['message_type'] = "danger"
+			request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 			return redirect('show_cabins')
 
@@ -290,10 +329,8 @@ def ChargeBooking(request):
 		
 		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-		request.session['message_starter'] = "OBS!"
 		# request.session['message'] = "Session not updated. Payment not completed. Please try again."
-		request.session['message'] = "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen."
-		request.session['message_type'] = "danger"
+		request = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 
 		return redirect('booking_overview')
 
@@ -379,21 +416,45 @@ def ChargeBooking(request):
 def BookingConfirmation(request):
 
 	args = {}
-	args = add_message(request, args)
+	args = add_alerts_from_session(request, args)
 
 	return render(request, 'main/booking_confirmation.html', args)
 
 
-def add_message(request, _args):
-	if 'message' in request.session:
-		_args['message'] = request.session['message']
-		request.session['message'] = None
-	if 'message_type' in request.session:
-		_args['message_type'] = request.session['message_type']
-		request.session['message_type'] = None
-	if 'message_starter' in request.session:
-		_args['message_starter'] = request.session['message_starter']
-		request.session['message_starter'] = None
-
+def add_alerts_from_session(request, _args):
+	if 'alerts' in request.session:
+		_args['alerts'] = request.session['alerts']
+		
+	request.session['alerts'] = None
 	return _args
+
+
+def add_alert(request, _alert, **kwargs):
+
+	a_type = 'primary'
+	if 'type' in kwargs:
+		a_type = kwargs['type']
+
+	a_starter = ''
+	if 'starter' in kwargs:
+		a_starter = kwargs['starter']
+
+	alerts = []
+	if 'alerts' in request.session:
+		if request.session['alerts'] is not None:
+			alerts = request.session['alerts']
+
+	alerts.append((_alert, a_type, a_starter))
+	print(alerts)
+	request.session['alerts'] = alerts
+
+	return request.session
+
+
+def deactivate_session_t_booking(request):
+	if 't_booking_id' in request.session:
+		t_booking_id = request.session['t_booking_id'] 
+		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
+		if not t_booking == None:
+			t_booking.deactivate()
 

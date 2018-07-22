@@ -25,6 +25,8 @@ class CabinChoose(forms.Form):
 	to_date = forms.CharField(widget=forms.HiddenInput())
 	cabin_number = forms.CharField(widget=forms.HiddenInput())
 
+	action = forms.CharField(widget=forms.HiddenInput())
+
 	t_booking_id = forms.IntegerField(
 		widget=forms.HiddenInput(),
 		required=False,

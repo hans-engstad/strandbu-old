@@ -4,6 +4,7 @@
 <div class="container search-cabin-form" style="background-color: white;" >
 	<form id="search-cabin-form" method="POST" action="{% url 'show_cabins' %}" style="width: 100%" autocomplete="off">
 		{% csrf_token %}
+		<input type="hidden" name="booking_action" value="cabin_search" />
 		<div class="row">
 			<div id="daterange-picker" class="input-group input-daterange" style="width: 50%">
 				<div class="row" style="margin-left: 5px; margin-right: 5px;">

@@ -26,9 +26,16 @@ h1, h2, h3, h4, h5, h6, p, td{
 	}
 }
 
-#alert-div{
-	margin-top: $navbar-height;
+#alerts-div{
+	position: absolute;
+	width: 100%;
+	margin-top: 0px;
+}
+
+.alert-div{
+	// margin-top: $navbar-height;
 	margin-bottom: 0px;
+	margin-top: 0px;
 }
 
 .hover-pointer{
