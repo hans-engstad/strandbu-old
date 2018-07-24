@@ -8,15 +8,15 @@
 		<div class="row">
 			<div id="daterange-picker" class="input-group input-daterange" style="width: 50%">
 				<div class="row" style="margin-left: 5px; margin-right: 5px;">
-					<div id="from_date" class="col-sm search-cabin-form-inputgroup">
+					<div id="from-date" class="col-sm search-cabin-form-inputgroup">
 						<span class="semilight-color serach-cabin-field-header from_date">Innsjekk</span>
 						<br>
-						{% render_field form.from_date class="search-cabin-input form-control" id="from-date-field" %}
+						{% render_field form.from_date class="search-cabin-input form-control" id="daterange-from-date" %}
 					</div>
 					<div id="to-date" class="col-sm search-cabin-form-inputgroup">
 						<span class="semilight-color serach-cabin-field-header to_date">Utsjekk</span>
 						<br>
-						{% render_field form.to_date class="search-cabin-input form-control" id="to-date-field" %}
+						{% render_field form.to_date class="search-cabin-input form-control" id="daterange-to-date" %}
 					</div>
 				</div>
 			</div>
