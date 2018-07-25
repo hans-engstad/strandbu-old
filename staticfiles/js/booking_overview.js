@@ -5,6 +5,10 @@ function AddCabin(){
   $('#add-cabin-form').submit();
 }
 
+function RemoveCabin(number){
+  $('#remove-cabin-' + number).submit();
+}
+
 
 var handler = StripeCheckout.configure({
   key: 'pk_test_sAnddD1C8K3Nv4QefeGpEBiS',

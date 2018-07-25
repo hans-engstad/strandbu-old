@@ -39,6 +39,8 @@ class Cabin(models.Model):
 
 	equivalent_cabins = models.ManyToManyField("self", blank=True)
 
+	sort_presedence = models.IntegerField(default=-1)
+
 	@property
 	def price_kr(self):
 		return int(self.price * 0.01)
@@ -60,6 +62,9 @@ class Cabin(models.Model):
 
 	def __str__(self):
 		return "[" + self.number.__str__() + "]"
+
+	class Meta:
+		ordering = ['sort_presedence']
 
 
 class Contact(models.Model):
@@ -113,7 +118,8 @@ class Booking(PolymorphicModel):
 			booking = TentativeBooking()
 			if _is_final:
 				booking = FinalBooking()
-				booking.active = True
+			
+			booking.active = True
 
 			booking.from_date = _from_date
 			booking.to_date = _to_date
@@ -127,6 +133,13 @@ class Booking(PolymorphicModel):
 
 			if 'late_arrival' in kwargs:
 				booking.late_arrival = kwargs.get('late_arrival')
+
+			#Check that booking dates are valid
+			if booking.from_date >= booking.to_date:
+				return False
+			now = datetime.datetime.now().date()
+			if booking.from_date <= now:
+				return False
 
 			#Validate booking fields
 			try:
@@ -166,7 +179,7 @@ class Booking(PolymorphicModel):
 
 
 	@classmethod
-	def get_available_cabins(cls, _from_date, _to_date, _persons, **kwargs):
+	def get_available_cabins(cls, _from_date, _to_date, **kwargs):
 		#Get bookings that overlap with given dates and are active
 		bookings = cls.get_bookings(_from_date, _to_date)
 
@@ -178,7 +191,7 @@ class Booking(PolymorphicModel):
 					available_cabins = available_cabins.exclude(number=cabin.number)
 
 		#Exclude cabins with not enough beds
-		available_cabins = available_cabins.filter(persons__gte=_persons)
+		# available_cabins = available_cabins.filter(persons__gte=_persons)
 
 		#Add cabins from t_booking session (if any)
 		if 't_booking' in kwargs:
@@ -205,6 +218,21 @@ class Booking(PolymorphicModel):
 			if not dates_overlap(dates_to_check, booking_dates):
 				bookings = bookings.exclude(id=booking.id)
 		return bookings
+
+	@classmethod
+	def remove_similar_cabins(cls, _cabins):
+		ids = []
+		for cabin in _cabins.all():
+			add_this = True
+			for eq_cabin in cabin.equivalent_cabins.all():
+				for cabin_id in ids:
+					if Cabin.objects.get(id=cabin_id).number == eq_cabin.number:
+						add_this = False
+						break
+			if add_this:
+				ids.append(cabin.id)
+		return Cabin.objects.filter(id__in=ids)
+
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))

@@ -72,36 +72,6 @@ $('#daterange-from-date').val(startString);
 $('#daterange-to-date').val(endString);
 
 
-function setup(){
-	datepickersSetup();
-}
-
-function datepickersSetup(){
-
-	console.log("Setup");
-
-	var date = new Date();	//Current date
-
-	console.log(date);
-
-	date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);	//Tomorrow
-	console.log(date);
-	var from_date = date;
-
-	date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);	//Day after tomorrow
-	var to_date = date;
-	
-
-
-	//Set visual fields
-	// $('#from-date-field').val(from_date.getDate() + "." + from_date.getMonth() + "." + from_date.getYear());
-	// $('#to-date-field').val(to_date.getDate() + "." + to_date.getMonth() + "." + to_date.getYear());
-}
-
-function personAmountSetup(){
-	$('#person-amount-form').val("1");
-}
-
 function onPersonsClick(){
 	var id = '#persons-input';
 	if($(id).val() == "")
@@ -110,5 +80,3 @@ function onPersonsClick(){
 	}
 	$(id).select();
 }
-
-setup();

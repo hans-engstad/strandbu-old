@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, redirect
 from main import forms
-from datetime import datetime
+import datetime
 from main.models import Booking, Cabin, TentativeBooking, Contact
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from strandbu.settings import dev as settings
@@ -23,15 +23,23 @@ import ast
 # Create your views here.
 def Home(request):
 	
-	form = forms.CabinSearch()
-	args = {'cabin_search_form': form}
+	args = {'cabin_search_form': forms.CabinSearch()}
 
 	args = add_alerts_from_session(request, args)
 
 
 	return render(request, 'main/home.html', args)
 
-# @never_cache
+
+def BookingView(request):
+
+	args = {'cabin_search_form': forms.CabinSearch()}
+
+	args = add_alerts_from_session(request, args)
+
+	return render(request, 'main/booking.html', args)
+
+
 def ShowCabins(request):
 
 
@@ -44,19 +52,22 @@ def ShowCabins(request):
 	if cabin_search_form.is_valid():
 		#Check database for search results
 
-		from_date = datetime.strptime(cabin_search_form.cleaned_data['from_date'], "%d.%m.%y")
-		to_date = datetime.strptime(cabin_search_form.cleaned_data['to_date'], "%d.%m.%y")
-		persons = cabin_search_form.cleaned_data['persons']
+		from_date = datetime.datetime.strptime(cabin_search_form.cleaned_data['from_date'], "%d.%m.%y").date()
+		to_date = datetime.datetime.strptime(cabin_search_form.cleaned_data['to_date'], "%d.%m.%y").date()
+		# persons = cabin_search_form.cleaned_data['persons']
 
-		if from_date >= to_date:
-			return HttpResponse("Checkout must be after checkin.")
+		if not booking_dates_check(from_date, to_date) == True:
+			return HttpResponse(booking_dates_check(from_date, to_date))
+
 
 		
 		t_booking = None
 		t_booking_id = -1
+		adding_cabin = False
 		if 'booking_action' in request.POST:
 			if request.POST.get('booking_action') == 'add_cabin':
 				t_booking_id = request.POST.get('t_booking_id')
+				adding_cabin = True
 		elif 't_booking_id' in request.session:
 			#Deactivate t_booking if we are not adding cabin. 
 			t_booking = Booking.objects.filter(id=request.session['t_booking_id']).first()
@@ -64,7 +75,11 @@ def ShowCabins(request):
 				t_booking.deactivate()
 			request.session['t_booking_id'] = None
 
-		cabins = Booking.get_available_cabins(from_date, to_date, persons, t_booking=t_booking)
+		cabins = Booking.get_available_cabins(from_date, to_date, t_booking=t_booking)
+
+		cabins = Booking.remove_similar_cabins(cabins)
+
+		
 
 
 		cabins_dict = {}
@@ -98,13 +113,14 @@ def ShowCabins(request):
 
 		info_header = ""
 
+		no_cabins = False
 		if cabins.count() == 0:
 			info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
-		if persons >= 4:
-			info_header = "Du kan bestille flere hytter ved å velge én om gangen."
+			no_cabins = True
+		
 
-		from_date_str = datetime.strftime(from_date, "%d.%m.%y")
-		to_date_str = datetime.strftime(to_date, "%d.%m.%y")
+		from_date_str = datetime.datetime.strftime(from_date, "%d.%m.%y")
+		to_date_str = datetime.datetime.strftime(to_date, "%d.%m.%y")
 
 
 		args = {
@@ -113,7 +129,11 @@ def ShowCabins(request):
 			'info_header': info_header, 
 			'from_date_str': from_date_str, 
 			'to_date_str': to_date_str,
+			'no_cabins': no_cabins,
+			'adding_cabin': adding_cabin,
 		}
+
+		print(args)
 
 		args = add_alerts_from_session(request, args)
 
@@ -143,7 +163,6 @@ def BookingOverview(request):
 	choose_form = forms.CabinChoose(request.POST)
 
 	if choose_form.is_valid():
-		
 
 		action = choose_form.cleaned_data['action']
 		if action == 'add_cabin':
@@ -163,14 +182,29 @@ def BookingOverview(request):
 			t_booking_id = -1
 			deactivate_session_t_booking(request)
 
+	remove_cabin_num = -1
+	if 'action' in request.POST:
+		if request.POST['action'] == 'show':
+			#Find session t_booking if any
+			if 't_booking_id' in request.session:
+				tmp_id = request.session['t_booking_id']
+				t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
+				if not t_booking == None:
+					if t_booking.is_active():
+						t_booking_id = tmp_id
+		elif request.POST['action'] == 'remove_cabin':
+			if not 'cabin_number' in request.POST:
+				request.session = add_alert(request, "Klarer ikke fjerne hytte. Vennligst prøv å lag ny bestilling.", type='danger')
+			else:
+				remove_cabin_num = request.POST['cabin_number']
 
 
 	if t_booking_id == -1:
 		if not choose_form.is_valid():
 			return HttpResponse("Choose form did not pass validation" + choose_form.errors.__str__())
 		#create tentative booking
-		from_date = datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y")
-		to_date = datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y")
+		from_date = datetime.datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y").date()
+		to_date = datetime.datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y").date()
 
 		number = choose_form.cleaned_data['cabin_number']
 		cabin = Cabin.objects.filter(number=number)
@@ -214,7 +248,7 @@ def BookingOverview(request):
 					request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 					return redirect('show_cabins')
 				cabin = eq_cabin
-
+			print("___" + t_booking.__str__())
 			t_booking.cabins.add(cabin)
 			t_booking.save()
 
@@ -229,6 +263,21 @@ def BookingOverview(request):
 	#Check if tentative booking session is expired
 	if not t_booking.is_active():
 		return HttpResponse('Session expired')
+
+	#Check that booking dates are valid
+	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
+		return HttpResponse(booking_dates_check(t_booking.from_date, t_booking.to_date))
+
+	print(t_booking.__str__())
+
+	if not remove_cabin_num == -1:
+		cabin_to_remove = Cabin.objects.get(number=remove_cabin_num)
+		print(cabin_to_remove)
+		print(t_booking.cabins.all())
+		t_booking.cabins.remove(cabin_to_remove)
+		t_booking.save()
+		print(t_booking.cabins.all())
+
 
 	cabins = {}
 	for c in t_booking.cabins.all():
@@ -335,6 +384,10 @@ def ChargeBooking(request):
 
 	if t_booking == None:
 		return HttpResponse("Unable to find tentative booking. Aborting payment.")
+
+	#Check that booking dates are valid
+	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
+		return HttpResponse(booking_dates_check(t_booking.from_date, t_booking.to_date))
 
 	#Check that price displayed matches t_booking price
 
@@ -455,4 +508,20 @@ def deactivate_session_t_booking(request):
 		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
 		if not t_booking == None:
 			t_booking.deactivate()
+
+def booking_dates_check(_from_date, _to_date):
+	check = True
+	now = datetime.datetime.now().date()
+
+
+	print(type(_from_date))
+	print(type(now))
+
+	if _from_date >= _to_date:
+		check = "Checkout must be after checkin."
+	elif _from_date <= now: 
+		check = "Checkin must be after today."
+
+	return check
+
 

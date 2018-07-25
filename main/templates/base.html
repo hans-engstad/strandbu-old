@@ -54,7 +54,7 @@
 							<a class="nav-link" href="#">Hjem<span class="sr-only">(current)</span></a>
 						</li>
 						<li class="nav-item active">
-							<a class="nav-link" href="#">Bestilling<span class="sr-only">(current)</span></a>
+							<a class="nav-link" href="{% url 'booking' %}">Bestilling<span class="sr-only">(current)</span></a>
 						</li>
 						<li class="nav-item active">
 							<a class="nav-link" href="#">Hytter og camping<span class="sr-only">(current)</span></a>
@@ -88,12 +88,25 @@
 		</div>
 
 		<div id="body">
-
-
 			{% block body %}
 
 			{% endblock %}
 		</div>
+
+		<footer id="footer">
+			<br>
+			<hr style="width: 80%">
+			<br>
+			<div class="col">
+				<div class="row center-hor"><i class="fas fa-phone" style="position:relative; top:4px;" ></i>&nbsp; {% include 'constants/phone_number.html'%}</div>
+				<div class="row center-hor"><i class="fas fa-envelope" style="position:relative; top:6px;" ></i> &nbsp;post@strandbu.no</div>
+				<br>
+				<div class="row center-hor">Strandbu Camping AS</div>
+				<div class="row center-hor">9143 Skibotn Norway</div>
+			</div>
+			<br>
+		</footer>
+
 		<script
   			src="https://code.jquery.com/jquery-3.3.1.min.js">
   		</script>
@@ -115,7 +128,7 @@
   		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.payment/1.2.3/jquery.payment.min.js"></script>
 
-		<script src="https://checkout.stripe.com/checkout.js"></script>
+		
 
 		<script src="{% static 'js/home.js'%}"></script>
 		<script src="{% static 'js/show_cabins.js'%}"></script>

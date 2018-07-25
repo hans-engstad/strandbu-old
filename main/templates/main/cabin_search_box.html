@@ -6,7 +6,7 @@
 		{% csrf_token %}
 		<input type="hidden" name="booking_action" value="cabin_search" />
 		<div class="row">
-			<div id="daterange-picker" class="input-group input-daterange" style="width: 50%">
+			<div id="daterange-picker" class="input-group input-daterange col" style="width: 50%">
 				<div class="row" style="margin-left: 5px; margin-right: 5px;">
 					<div id="from-date" class="col-sm search-cabin-form-inputgroup">
 						<span class="semilight-color serach-cabin-field-header from_date">Innsjekk</span>
@@ -22,12 +22,12 @@
 			</div>
 
 			
-			<div id="persons" class="col search-cabin-form-inputgroup">
-				<span id="persons-header" class="semilight-color serach-cabin-field-header">Antall gjester</span>
-				<br>
-				{% render_field form.persons id="persons-input" class="search-cabin-input col-sm" value="1" %}
-			</div>
-			<div id="search-button-container" class="col">
+			{# <div id="persons" class="col search-cabin-form-inputgroup"> #}
+				{# <span id="persons-header" class="semilight-color serach-cabin-field-header">Antall gjester</span> #}
+				{# <br> #}
+				{# {% render_field form.persons id="persons-input" class="search-cabin-input col-sm" value="1" %} #}
+			{# </div> #}
+			<div id="search-button-container" class="col-3">
 				<button id="search-button" class="normal-button" type="submit" ><span class="glyphicon glyphicon-search"></span> Søk</button>
 			</div>
 		</div>

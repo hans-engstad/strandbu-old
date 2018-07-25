@@ -1,0 +1,63 @@
+/* line 3, staticfiles/scss/booking/cabin_search_box.scss */
+#search-cabin-box {
+  margin: auto;
+  width: 60%;
+  background-color: white;
+  padding: 5px 7% 0px 7%;
+  border: 1px solid #707070;
+  box-shadow: 1px 1px 1px grey; }
+
+/* line 12, staticfiles/scss/booking/cabin_search_box.scss */
+#to-date {
+  border-left: 1px solid grey; }
+
+/* line 17, staticfiles/scss/booking/cabin_search_box.scss */
+#persons-choose-box {
+  width: 100px;
+  height: 100px;
+  background-color: white; }
+
+/* line 24, staticfiles/scss/booking/cabin_search_box.scss */
+#contact-info {
+  text-align: center;
+  font-size: 12px; }
+
+/* line 29, staticfiles/scss/booking/cabin_search_box.scss */
+#persons-input-group {
+  margin-left: 10px;
+  margin-right: 0px;
+  margin-top: 7px;
+  width: 120px; }
+
+/* line 37, staticfiles/scss/booking/cabin_search_box.scss */
+#persons-input {
+  text-align: center; }
+
+/* line 41, staticfiles/scss/booking/cabin_search_box.scss */
+#search-button {
+  height: 100%;
+  width: 100%;
+  font-size: 18px; }
+
+/* line 48, staticfiles/scss/booking/cabin_search_box.scss */
+.serach-cabin-field-header {
+  font-size: 14px; }
+
+/* line 52, staticfiles/scss/booking/cabin_search_box.scss */
+.search-cabin-form {
+  border: 1px solid grey;
+  padding: 7px 10px 7px 10px; }
+
+/* line 57, staticfiles/scss/booking/cabin_search_box.scss */
+.search-cabin-input {
+  border: 0px;
+  background-color: #FFFFFF;
+  height: 30px;
+  text-align: center;
+  width: 100%;
+  font-weight: 500; }
+  /* line 66, staticfiles/scss/booking/cabin_search_box.scss */
+  .search-cabin-input:focus {
+    border: 0px;
+    box-shadow: 0px 0px 0px;
+    outline: none; }

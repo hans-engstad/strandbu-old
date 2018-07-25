@@ -17,6 +17,10 @@ h1, h2, h3, h4, h5, h6, p, td{
 	z-index: map-get($z-index, body) 
 }
 
+#footer{
+	background-color: $home-page-bg-color;
+}
+
 #phone-layout{
 	text-align: center;
 	font-size: 14px;

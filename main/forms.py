@@ -7,7 +7,7 @@ from . import models
 class CabinSearch(forms.Form):
 	from_date = forms.CharField()
 	to_date = forms.CharField()
-	persons = forms.IntegerField();
+	# persons = forms.IntegerField();
 
 
 #Form used when creating tentative booking

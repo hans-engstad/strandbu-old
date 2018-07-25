@@ -13,7 +13,9 @@
 				<span style="text-decoration: underline;">{{ from_date_str }} - {{ to_date_str }}</span> 
 			</div>
 			<div class="col center-hor">
-				<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
+				{% if add_cabin %}
+					<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
+				{% endif %}
 			</div>
 
 			
@@ -36,10 +38,16 @@
 					{% else %}
 						<div id="cabin-result-label-{{ cabin.number }}" class="cabin-result-label" onClick="showCabin({{ cabin.number }})">
 					{% endif %}
-							<h5 class="cabin-result-label-header">
-								<i id="right-arrow-{{ cabin.number }}" class="fas fa-chevron-right cabin-acc-right"></i>
-								{{ cabin.title }} [{{cabin.number}}]
-							</h5>
+							<div class="row">
+								<h5 class="cabin-result-label-header col">
+									<i id="right-arrow-{{ cabin.number }}" class="fas fa-chevron-right cabin-acc-right"></i>
+									{{ cabin.title }} <!--[{{cabin.number}}]-->
+								</h5>
+								<!--<div class="col-2 pull-right">
+									<img src="{% static 'images/person_icon.png' %}" style="width: 15px" >
+									<span style="position: relative;top: 3px;"> {{ cabin.persons }}</span>
+								</div>-->
+							</div>
 						</div>
 					{% if forloop.counter0 == 0 %}
 						<div id="cabin-result-img-{{ cabin.number }}" class="carousel slide cabin-result-img" data-ride="carousel" data-interval="false">
@@ -81,6 +89,11 @@
 								<div class="col-11">
 									<h3 class="cabin-content-header">{{ cabin.title }}</h3>
 									<p>{{ cabin.short_description }}</p>
+									<div style="position: relative;bottom: 12px;">
+										<img src="{% static 'images/person_icon.png' %}" style="width: 15px" >
+										<span style="position: relative;top: 3px;"> {{ cabin.persons }}</span>
+									</div>
+
 									<p class="default-link more-link">Mer om hytten</p>
 									<div class="row">
 										<div class="col-6">
@@ -120,6 +133,20 @@
 				
 				
 			{% endfor %}
+
+			{% if no_cabins and adding_cabin %}
+				<div class="center-hor">
+					<form method="POST" action="{% url 'booking_overview' %}" >
+						<div class="hide">
+							{% csrf_token %}
+							{{ cabin_search_form }}
+							<input name="action" value="show" />
+						</div>
+						<button class="normal-button" style="padding: 15px;" type="submit">Tilbake til oversikt</button>
+					</form>
+				</div>
+			{% endif %}
+
 		</div>
 	</div>
 </div>

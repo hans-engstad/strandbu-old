@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block body %}
 <div class="default-page-bg">
@@ -17,7 +18,16 @@
 								<span class="booking-title">{{cabin.title}} </span>
 							</div>
 							<div class="col">
-								<span class="default-link change-link">Endre</span>
+								<form id="remove-cabin-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
+									<button class="default-link change-link" type="submit" >Fjern</button>
+									<div class="hide">
+										{% csrf_token %}
+										{{ cabin_search_form }}
+										<input name="action" value="remove_cabin" />
+										<input name="cabin_number" value="{{ cabin.number }}" />
+									</div>
+								</form>
+									
 							</div>
 						</div>
 					</div>
@@ -96,13 +106,9 @@
 			{{ cabin_search_form }}
 		</form>
 	</div>
-
-
-	
-
-	
-
-
-
 </div>
+
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
+
 {% endblock %}
