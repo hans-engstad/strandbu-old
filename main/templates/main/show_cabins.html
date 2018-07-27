@@ -8,12 +8,16 @@
 		<br>
 		
 		<div class="cabin-search-result row">
-			<div class="col"></div>
+			<div class="col">
+				{% if adding_cabin %}
+					<a class="default-link" href="#" onClick="BackToOverview()">Tilbake til oversikt</a>
+				{% endif %}
+			</div>
 			<div class="col center-hor">
 				<span style="text-decoration: underline;">{{ from_date_str }} - {{ to_date_str }}</span> 
 			</div>
 			<div class="col center-hor">
-				{% if add_cabin %}
+				{% if not adding_cabin %}
 					<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
 				{% endif %}
 			</div>
@@ -118,6 +122,7 @@
 												<form id="cabin-form-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
 													{% csrf_token %}
 													{{ cabin.choose_form_single }}
+
 													<div class="hide">
 														{{ cabin_search_form }}
 													</div>
@@ -134,14 +139,15 @@
 				
 			{% endfor %}
 
-			{% if no_cabins and adding_cabin %}
+			{% if  adding_cabin %}
 				<div class="center-hor">
-					<form method="POST" action="{% url 'booking_overview' %}" >
+					<form id="back-to-overview-form" method="POST" action="{% url 'booking_overview' %}" >
 						<div class="hide">
 							{% csrf_token %}
 							{{ cabin_search_form }}
 							<input name="action" value="show" />
 						</div>
+						<br>
 						<button class="normal-button" style="padding: 15px;" type="submit">Tilbake til oversikt</button>
 					</form>
 				</div>

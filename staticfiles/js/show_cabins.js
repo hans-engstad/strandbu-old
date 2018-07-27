@@ -21,3 +21,8 @@ function ChangeSearchHide(){
 	$('#change-search-link').html("Endre søk")
 	$('#change-search-link').attr("onClick", 'ChangeSearchShow()');
 }
+
+function BackToOverview(){
+	console.log("Submitting");
+	$('#back-to-overview-form').submit();
+}

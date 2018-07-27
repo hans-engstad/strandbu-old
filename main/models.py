@@ -200,9 +200,6 @@ class Booking(PolymorphicModel):
 				if t_booking.is_active():
 					available_cabins = (available_cabins | t_booking.cabins.all()).distinct()
 
-						
-
-
 		return available_cabins
 
 	@classmethod
@@ -264,11 +261,43 @@ class TentativeBooking(Booking):
 	def is_active(self):
 		if not self.active:
 			return False
-		idle_max_time = 1
+		idle_max_time = 10
 		
 		if timezone.now() >= self.last_updated_time + datetime.timedelta(minutes=idle_max_time):
 			return False
 		return True
+
+	def is_valid(self):
+		if not self.is_active():
+			return False
+
+		bookings = Booking.get_bookings(self.from_date, self.to_date)
+		for booking in bookings:
+			if booking.id == self.id:
+				continue
+			for booking_cabin in booking.cabins.all():
+				for this_cabin in self.cabins.all():
+					if this_cabin.number == booking_cabin.number:
+						return False
+
+		#Check that checkin is before checkout
+		if self.from_date >= self.to_date:
+			return False
+
+		return True
+
+	def from_date_is_valid(self):
+		#Check that checkin is after today
+		now = datetime.datetime.now().date()
+		if self.from_date <= now:
+			return False
+
+		if self.from_date >= self.to_date:
+			return False
+			
+		return True
+
+			
 
 	def create_active_copy(self):
 		return Booking.create_booking(self.from_date, self.to_date, self.cabins.all(), False)

@@ -18,16 +18,7 @@
 								<span class="booking-title">{{cabin.title}} </span>
 							</div>
 							<div class="col">
-								<form id="remove-cabin-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
-									<button class="default-link change-link" type="submit" >Fjern</button>
-									<div class="hide">
-										{% csrf_token %}
-										{{ cabin_search_form }}
-										<input name="action" value="remove_cabin" />
-										<input name="cabin_number" value="{{ cabin.number }}" />
-									</div>
-								</form>
-									
+								<span class="default-link change-link" onClick="RemoveCabin({{ cabin.number }})" >Fjern</span>
 							</div>
 						</div>
 					</div>
@@ -105,6 +96,14 @@
 			<input name="booking_action" value="add_cabin" />
 			{{ cabin_search_form }}
 		</form>
+		{% for key, cabin in t_booking.cabins.items %}
+			<form id="remove-cabin-{{ cabin.number }}" method="POST" action="{% url 'booking_overview' %}">
+				{% csrf_token %}
+				{{ cabin_search_form }}
+				<input name="action" value="remove_cabin" />
+				<input name="cabin_number" value="{{ cabin.number }}" />
+			</form>
+		{% endfor %}
 	</div>
 </div>
 

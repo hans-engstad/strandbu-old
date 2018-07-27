@@ -72,22 +72,23 @@
 
 		
 
-		<div id="alerts-div">
-			{% if alerts %}	
-				{% for alert in alerts %}
-					<div class="alert-div alert alert-primary alert-{{ alert.1 }} alert-dismissible fade show" role="alert">
-
-						<strong>{{ alert.2 }}</strong>
-						{{ alert.0 }}
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-				{% endfor %}
-			{% endif %}
-		</div>
+		
 
 		<div id="body">
+			<div id="alerts-div">
+				{% if alerts %}	
+					{% for alert in alerts %}
+						<div class="alert-div alert alert-primary alert-{{ alert.1 }} alert-dismissible fade show" role="alert">
+							<strong>{{ alert.2 }}</strong>
+							{{ alert.0 }}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+
 			{% block body %}
 
 			{% endblock %}

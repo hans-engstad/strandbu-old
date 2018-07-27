@@ -57,7 +57,8 @@ def ShowCabins(request):
 		# persons = cabin_search_form.cleaned_data['persons']
 
 		if not booking_dates_check(from_date, to_date) == True:
-			return HttpResponse(booking_dates_check(from_date, to_date))
+			request.session = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen.')
+			return redirect('booking')
 
 
 		
@@ -94,17 +95,12 @@ def ShowCabins(request):
 			res['images'] = c.images.all().values_list('img', flat=True) 
 			res['price_kr'] = c.price_kr
 
-			action = 'single_cabin'
-
-			if 'booking_action' in request.POST:
-				action = request.POST['booking_action']
-
 			cabin_choose_data = {
 				'from_date': cabin_search_form.cleaned_data['from_date'],
 				'to_date': cabin_search_form.cleaned_data['to_date'],
 				'cabin_number': c.number.__str__(),
 				't_booking_id': t_booking_id,
-				'action': action,
+				'action': 'add_cabin',
 			}
 
 			res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
@@ -148,19 +144,41 @@ def ShowCabins(request):
 # @never_cache
 def BookingOverview(request):
 	
-	#Define Cabin Search Form. Used when adding new cabin
+	#Define Cabin Search Form. Used when redirecting
 	cabin_search_form = forms.CabinSearch(request.POST)
 	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
 		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
 
 	if not cabin_search_form.is_valid():
-		return HttpResponse("Cabin search form is not valid")
+		#Unable to retrieve search form. Redirect to booking page
+		request.session = add_alert(request, 'Klarer ikke vise oversikt. Vennligst prøv igjen.', type='danger')
+		return redirect('booking')
 
-	#Id of t_booking, -1 if nothing (Also default value in choose_form)
-	t_booking_id = -1
+	#add search form to session, used when redirecting to show cabins
+	request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
-	#Instantiate cabin choose form
-	choose_form = forms.CabinChoose(request.POST)
+	#Declare arguments
+	args = {}
+	args['choose_form'] = forms.CabinChoose(request.POST)
+	args['cabin_search_form'] = cabin_search_form
+
+
+	action = 'show'
+	if 'action' in request.POST:
+		action = request.POST['action']
+
+	if action == 'show':
+		return BookingOverview_show(request, args)
+	elif action == 'add_cabin':
+		return BookingOverview_add_cabin(request, args)
+	elif action == 'remove_cabin':
+		return BookingOverview_remove_cabin(request, args)
+	else:
+		#Not valid action
+		print("Warning: \"" + action + "\" is not a recognized action. ")
+		return BookingOverview_show(request, args)
+
+	"""
 
 	if choose_form.is_valid():
 
@@ -312,34 +330,48 @@ def BookingOverview(request):
 
 	return render(request, 'main/booking_overview.html', args)
 
+	"""
+	return HttpResponse("hey")
+
 
 def ChargeBooking(request):
 
+	#Define Cabin Search Form. Used when redirecting
+	cabin_search_form = forms.CabinSearch(request.POST)
+	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
+		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
+
+	#Check if cabin_search_form is valid
+	if not cabin_search_form.is_valid():
+		request.session = add_alert(request, 'En feil har oppstått. Betalingen er ikke gjennomført. Vennligst prøv igjen.', type='danger', starter='OBS!')
+		return redirect('booking')
+
+	#Update cabin_search_form_data session
+	request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
+
+	#Check that request method is POST
 	if not request.method == 'POST':
-		return HttpResponse('Request method must be POST.')
+		request.session = add_alert(request, 'En feil har oppstått. Betalingen er ikke gjennomført. Vennligst prøv igjen.', type='danger', starter='OBS!')
+		return redirect('show_cabins')
 
-	form = forms.ChargeForm(request.POST)
-
-	if not form.is_valid():
+	#Retrieve charge form
+	charge_form = forms.ChargeForm(request.POST)
+	if not charge_form.is_valid():
 		print(form.errors)
 		return HttpResponse("Payment form did not pass validation. Aborting payment. Booking not created.")
 
-	data = form.cleaned_data
+	#Retrieve charge data from charge form
+	charge_data = charge_form.cleaned_data
 
-	price = data['total_price']
-	phone = data['phone']
-	t_booking_id = data['t_booking_id']
+	price = charge_data['total_price']
+	phone = charge_data['phone']
+	t_booking_id = charge_data['t_booking_id']
+
+	#Find t_booking
 	t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()	#TODO: We might not find this booking!
 	
 	if t_booking == None:
-		cabin_search_form = forms.CabinSearch(request.POST)
-		if not cabin_search_form.is_valid():
-			return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
-		
-		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-
-		request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
-
+		request.session = add_alert(request, "Klarer ikke finne bestilling. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 		return redirect('show_cabins')
 
 	if not t_booking.is_active():
@@ -347,66 +379,62 @@ def ChargeBooking(request):
 		t_booking_id = t_booking.create_active_copy()
 		if t_booking_id == False:
 			#Redirect with alert (Booking no longer valid)
-			cabin_search_form = forms.CabinSearch(request.POST)
-			if not cabin_search_form.is_valid():
-				return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
-			
-			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-
 			request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
-
 			return redirect('show_cabins')
 
 		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
 
+	if not t_booking.is_valid():
+		request.session = add_alert(request, "Bestilling ikke lengre gyldig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		return redirect('show_cabins')
 
+	#Update session variable
+	request.session['t_booking_id'] = t_booking_id
 
-	JSON_data = ast.literal_eval(data['t_booking_JSON'])
-	t_booking_JSON = serializers.TentativeBookingSerializer(t_booking).data
+	#Serialized booking from charge_form field
+	charge_t_booking_serialized = ast.literal_eval(charge_data['t_booking_JSON'])
+	
+	#Serialized booking from db
+	t_booking_serialized = serializers.TentativeBookingSerializer(t_booking).data
 
-	#Check that JSON t_booking matches t_booking
-	field_names = ['id', 'from_date','to_date', 'cabins', 'created_date', 'active']
-	if not JSON_data == t_booking_JSON:
+	#Check that t_booking matches charge-t_booking
+	if not charge_t_booking_serialized == t_booking_serialized:
 		#Fields do not match, redirect to booking overview with updated booking
-		request.session['t_booking_id'] = t_booking_id
-
-		cabin_search_form = forms.CabinSearch(request.POST)
-		if not cabin_search_form.is_valid():
-			return HttpResponse("Cabin search form is not valid. Unable to redirect to overview. Payment aborted.")
-		
-		request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-
-		# request.session['message'] = "Session not updated. Payment not completed. Please try again."
 		request.session = add_alert(request, "Sesjon ikke oppdatert. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
-
 		return redirect('booking_overview')
 
-
-	if t_booking == None:
-		return HttpResponse("Unable to find tentative booking. Aborting payment.")
-
 	#Check that booking dates are valid
-	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
-		return HttpResponse(booking_dates_check(t_booking.from_date, t_booking.to_date))
+	if not t_booking.from_date_is_valid():
+		request.session = add_alert(request, "Bestilling ikke lengre gydlig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		return redirect('booking')
 
 	#Check that price displayed matches t_booking price
+	if not charge_data['total_price'] == t_booking.get_price():
+		request.session = add_alert(request, "Pris stemmer ikke med sesjon. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		return redirect('booking_overview')
 
-	token = data['token']
+	#Load token data
+	token = charge_data['token']
 	token_data = json.loads(token)
 
+	#Retrieve contact data
 	contact_data = {
 		'name': token_data['card']['name'],
 		'email': token_data['email'],
 		'phone': phone,
 		'country': token_data['card']['address_country'],
-		'late_arrival': data['late_arrival']
+		'late_arrival': charge_data['late_arrival']
 	}
 
+	#Declare contact data 
 	contact_form = forms.ContactForm(contact_data)
 
+	#Check that contact data is valid
 	if not contact_form.is_valid():
-		return HttpResponse('Contact info did not pass validation. Aborting payment')
+		request.session = add_alert(request, "Kontaktinformasjon ugyldig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		return redirect('booking_overview')
 
+	#Create contact object
 	contact = Contact.objects.create(
 		name=contact_form.cleaned_data['name'],
 		email=contact_form.cleaned_data['email'],
@@ -414,6 +442,7 @@ def ChargeBooking(request):
 		country=contact_form.cleaned_data['country'],
 	)
 
+	#Retrieve key used for making payment
 	stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 	#if unable to create charge, HTTP error will be raised by stripe.
@@ -425,6 +454,7 @@ def ChargeBooking(request):
 		#metadata = {'booking_id': booking_id},
 	)
 
+	#Create booking
 	booking_result = Booking.create_booking_from_tentative(t_booking, contact, charge.id)
 	if booking_result == False:
 		#Fatal error, booking payed for, but not reserved!
@@ -438,7 +468,6 @@ def ChargeBooking(request):
 	booking.save()
 
 	#Send confirmation mail 
-
 	cabins = booking.cabins.all()
 	titles = []
 	for cabin in cabins:
@@ -470,6 +499,141 @@ def BookingConfirmation(request):
 	args = add_alerts_from_session(request, args)
 
 	return render(request, 'main/booking_confirmation.html', args)
+
+
+
+
+
+
+#Show current booking overview based on session
+def BookingOverview_show(request, _args):
+	t_booking = get_valid_t_booking(request)
+	if t_booking == False:
+		request.session = add_alert(request, "Klarer ikke finne bestilling. Vennligst prøv igjen.", type='warning')
+		return redirect('show_cabins')
+
+	#Check that t_booking is active, replace if not active
+	if not t_booking.is_active():
+		#t_booking not active, try creating active copy
+		t_booking = t_booking.create_active_copy()
+		if t_booking == False:
+			#Unable to create active copy, redirecting
+			request.session = add_alert(request, "Sesjon utløpt. Vennligst prøv igjen.", type='primary')
+			return redirect('show_cabins')	
+		request.session['t_booking_id'] = t_booking_id
+
+	#Check that t_booking not empty
+	if t_booking.cabins.all().count() == 0:
+		request.session = add_alert(request, "Klarer ikke vise bestilling. Vennligst prøv igjen.", type='warning')
+		return redirect('show_cabins')	
+
+	#Check that booking dates are valid
+	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
+		message = booking_dates_check(t_booking.from_date, t_booking.to_date)
+		request.session = add_alert(request, message, type="warning")
+		request.session['t_booking_id'] = None
+		return redirect('show_cabins')
+
+	#Serialize cabins
+	cabins = {}
+	for c in t_booking.cabins.all():
+		cabins['cabin_' + c.number.__str__()] = {
+			'number': c.number,
+			'title': c.title,
+		}
+
+	#Serialize t_booking information
+	t_booking_info = {
+		'cabins': cabins,
+		'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
+		'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
+		'price': t_booking.get_price(),
+		'id': t_booking.id,
+		'JSON': serializers.TentativeBookingSerializer(t_booking).data,
+	}
+
+	#Declare arguments
+	args = {
+		't_booking': t_booking_info, 
+		'info_form': forms.PreChargeInfoForm(), 
+		'cabin_search_form': _args['cabin_search_form'],
+	}
+
+	#Add alerts to args
+	args = add_alerts_from_session(request, args)
+
+	return render(request, 'main/booking_overview.html', args)
+
+
+def BookingOverview_add_cabin(request, _args):
+	#Retrieve choose_form
+	choose_form = _args['choose_form']
+	if not choose_form.is_valid():
+		request.session = add_alert(request, 'Klarer ikke legge til hytte. Vennligst prøv igjen.', type='danger')
+		return redirect('show_cabins')
+
+	#retrieve data from choose_form
+	from_date = datetime.datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y").date()
+	to_date = datetime.datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y").date()
+	number = choose_form.cleaned_data['cabin_number']
+	cabin = Cabin.objects.filter(number=number)
+
+	#Find t_booking
+	t_booking = get_t_booking(request)
+	if t_booking == None:
+		#Create t_booking
+		t_booking_id = Booking.create_booking(from_date, to_date, cabin, False)
+		request.session['t_booking_id'] = t_booking_id
+		if t_booking_id == False:
+			#Booking no longer valid, redirect to show_cabins	
+			request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
+			return redirect('show_cabins')
+		t_booking = TentativeBooking.objects.get(id=t_booking_id)
+	else:
+		#Add cabin to existing t_booking
+		t_booking.cabins.add(cabin.first())
+		t_booking.save()
+		if not t_booking.is_valid():
+			request.session = add_alert(request, "Bestilling ikke lengre gyldig. Vennligst prøv igjen.", type='primary')
+			t_booking.deactivate()
+			return redirect('show_cabins')
+	request.session['t_booking_id'] = t_booking.id
+
+	return BookingOverview_show(request, _args)
+
+
+
+def BookingOverview_remove_cabin(request, _args):
+
+	t_booking = get_t_booking(request)
+	if t_booking == None:
+		request.session = add_alert(request, "Klarer ikke fjerne hytte, finner ikke bestilling. Vennligst prøv igjen.", type='warning')
+		return redirect('show_cabins')
+
+	if not t_booking.is_valid():
+		request.session = add_alert(request, "Sesjon utløpt. Vennligst prøv igjen.", type='primary')
+		return BookingOverview_show(request, _args)
+
+	if not 'cabin_number' in request.POST:
+		request.session = add_alert(request, "Klarer ikke fjerne hytte, finner ikke hytte. Vennligst prøv igjen.", type='warning')
+		return redirect('show_cabins')
+
+	cabin_number = request.POST['cabin_number']
+
+	cabin = Cabin.objects.filter(number=cabin_number).first()
+	if cabin == None:
+		request.session = add_alert(request, "Klarer ikke fjerne hytte, finner ikke hytte. Vennligst prøv igjen.", type='danger')
+
+	t_booking.cabins.remove(cabin)
+	t_booking.save()
+
+	if t_booking.cabins.all().count() == 0:
+		request.session = add_alert(request, "Alle hytter fjernet. Velg hytte på nytt.", type='primary')
+		return redirect('show_cabins')		
+
+	return BookingOverview_show(request, _args)
+
+
 
 
 def add_alerts_from_session(request, _args):
@@ -518,10 +682,32 @@ def booking_dates_check(_from_date, _to_date):
 	print(type(now))
 
 	if _from_date >= _to_date:
-		check = "Checkout must be after checkin."
+		check = "Utsjekk må være etter innjekk."
 	elif _from_date <= now: 
-		check = "Checkin must be after today."
+		check = "Innsjekk må være etter i dag."
 
 	return check
 
+
+def get_t_booking(request):
+	if 't_booking_id' in request.session:
+		t_id = request.session['t_booking_id']
+		t_booking = TentativeBooking.objects.filter(id=t_id).first()
+		if not t_booking == None:
+				return t_booking
+	return None
+
+def get_valid_t_booking(request):
+	t_booking = get_t_booking(request)
+	if t_booking == None:
+		return False
+	if t_booking.is_valid():
+		return t_booking
+
+	if not t_booking.is_active():
+		t_booking_id = t_booking.create_active_copy()
+		if t_booking_id == False:
+			return False
+		return TentativeBooking.objects.get(id=t_booking_id)
+	return False
 

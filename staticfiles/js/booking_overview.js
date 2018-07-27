@@ -6,6 +6,7 @@ function AddCabin(){
 }
 
 function RemoveCabin(number){
+  console.log("remove");
   $('#remove-cabin-' + number).submit();
 }
 

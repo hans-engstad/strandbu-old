@@ -14,7 +14,8 @@ h1, h2, h3, h4, h5, h6, p, td{
 
 #body{
 	margin-top: $navbar-height;
-	z-index: map-get($z-index, body) 
+	z-index: map-get($z-index, body);
+
 }
 
 #footer{
@@ -35,16 +36,18 @@ h1, h2, h3, h4, h5, h6, p, td{
 }
 
 #alerts-div{
-	position: absolute;
+	position: fixed;
 	width: 100%;
 	margin-top: 0px;
-	z-index: map-get($z-index, alerts)
+	z-index: map-get($z-index, alerts);
 }
 
 .alert-div{
+	// position: fixed;
 	// margin-top: $navbar-height;
 	margin-bottom: 0px;
 	margin-top: 0px;
+	// height: 50px;
 }
 
 .hover-pointer{
