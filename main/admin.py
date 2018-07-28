@@ -1,12 +1,13 @@
 from django.contrib import admin
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin, PolymorphicChildModelFilter
-from main.models import Booking, Cabin, CabinImage, CabinEquipment, Contact, TentativeBooking, FinalBooking
+from main.models import Booking, Cabin, CabinImage, CabinEquipment, Contact, TentativeBooking, FinalBooking, AdminSettings
 
 # Register your models here.
 admin.site.register(Cabin)
 admin.site.register(CabinImage)
 admin.site.register(CabinEquipment)
 admin.site.register(Contact)
+admin.site.register(AdminSettings)
 
 
 

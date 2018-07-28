@@ -9,6 +9,28 @@ import polymorphic
 import json
 
 
+class AdminSettings(models.Model):
+	min_from_date = models.IntegerField(default=1, help_text="Min days from today for from_date that customer can book cabin.")
+	max_from_date = models.IntegerField(default=364, help_text="Max days from today for from_date that customer can book cabin.")
+	
+	max_to_date = models.IntegerField(default=365, help_text="Max days from today for to_date that customer can book cabin.")
+
+	max_date_span = models.IntegerField(default=365, help_text="Max days for booking")
+
+
+	last_edit_date = models.DateTimeField(auto_now=True)
+
+
+
+
+	def save(self, *args, **kwargs):
+		if AdminSettings.objects.exists() and not self.pk:
+			raise ValidationError('There can be only one AdminSettings object.')
+		return super(AdminSettings, self).save(*args, **kwargs)
+
+	def __str__(self):
+		return 'Admin Settings: ' + self.last_edit_date.__str__()
+
 
 class CabinImage(models.Model):
 	name = models.CharField(max_length=50, default="")
@@ -273,6 +295,37 @@ class TentativeBooking(Booking):
 
 	last_updated_time = models.DateTimeField(auto_now=True)
 
+	@classmethod
+	def booking_dates_are_valid(cls, _from_date, _to_date):
+		#Check that checkin is after today + AdminSettings days
+		now = datetime.datetime.now().date()
+
+		settings = AdminSettings.objects.first()
+
+		minCheckin = now + datetime.timedelta(days=settings.min_from_date)
+		maxCheckin = now + datetime.timedelta(days=settings.max_from_date)
+
+
+		print('min: ' + minCheckin.__str__())
+		print('from: ' + _from_date.__str__())
+
+		if _from_date < minCheckin:
+			print(1)
+			return False
+		if _from_date > maxCheckin:
+			print(2)
+			return False
+
+		if _from_date >= _to_date:
+			print(3)
+			return False
+
+		day_span = len(get_dates_between(_from_date, _to_date))
+		if day_span > settings.max_date_span:
+			return False
+
+		return True
+
 	def set_updated_time_now(self):
 		self.last_updated_time = timezone.now()
 
@@ -304,16 +357,8 @@ class TentativeBooking(Booking):
 
 		return True
 
-	def from_date_is_valid(self):
-		#Check that checkin is after today
-		now = datetime.datetime.now().date()
-		if self.from_date <= now:
-			return False
-
-		if self.from_date >= self.to_date:
-			return False
-
-		return True
+	def dates_are_valid(self):
+		TentativeBooking.booking_dates_are_valid(self.from_date, self.to_date)
 
 			
 

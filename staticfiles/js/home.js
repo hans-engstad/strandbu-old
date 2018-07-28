@@ -1,15 +1,18 @@
 
+var min_from_date = parseInt($('#min_from_date').val());
+
 var start = new Date();
-start.setDate(start.getDate() + 1);
+start.setDate(start.getDate() + min_from_date);
 
 var end = new Date();
-end.setDate(end.getDate() + 2);
+end.setDate(end.getDate() + min_from_date + 1);
 
 var maxDate = new Date();
 maxDate.setFullYear(maxDate.getFullYear() + 1);
 
-var startString = start.getDate() + "." + start.getMonth() + "." + start.getFullYear().toString().substr(-2);
-var endString = end.getDate() + "." + end.getMonth() + "." + end.getFullYear().toString().substr(-2);
+var startString = start.getDate() + "." + (start.getMonth() + 1) + "." + start.getFullYear().toString().substr(-2);
+var endString = end.getDate() + "." + (end.getMonth() + 1) + "." + end.getFullYear().toString().substr(-2);
+
 
 
 $('#daterange-from-date').daterangepicker({
@@ -51,17 +54,18 @@ $('#daterange-to-date').daterangepicker({
 	}, 
 	function(start, end, label) {
 		//NOTE: start and end parameters are the same
-		end = new Date(end);
-		end.setHours(0,0,0,0);
+		var to_date = new Date(end);
+		to_date.setHours(0,0,0,0);
 		//Check that to-date is after this date
-		_start = moment($('#daterange-from-date').val(), 'DD.MM.YY').toDate();
-		_start.setHours(0,0,0,0);
-		if(_start >= end)
+		var from_date = moment($('#daterange-from-date').val(), 'DD.MM.YY').toDate();
+
+		from_date.setHours(0,0,0,0);
+		if(from_date >= to_date)
 		{
 			//Set from-date before to-date
-			start = new Date(end.setDate(end.getDate() - 1));
-			$('#daterange-from-date').data('daterangepicker').setStartDate(start);
-			$('#daterange-from-date').data('daterangepicker').setEndDate(start);
+			from_date = new Date(to_date.setDate(to_date.getDate() - 1));
+			$('#daterange-from-date').data('daterangepicker').setStartDate(from_date);
+			$('#daterange-from-date').data('daterangepicker').setEndDate(from_date);
 		}
 	}
 );

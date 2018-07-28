@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, HttpResponse, redirect
 from main import forms
 import datetime
-from main.models import Booking, Cabin, TentativeBooking, Contact
+from main.models import Booking, Cabin, TentativeBooking, Contact, AdminSettings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from strandbu.settings import dev as settings
 from django_countries import countries
@@ -23,9 +23,13 @@ import ast
 # Create your views here.
 def Home(request):
 	
-	args = {'cabin_search_form': forms.CabinSearch()}
+	args = {
+		'cabin_search_form': forms.CabinSearch(),
+		'min_from_date' : AdminSettings.objects.first().min_from_date,
+	}
 
 	args = add_alerts_from_session(request, args)
+
 
 
 	return render(request, 'main/home.html', args)
@@ -33,7 +37,10 @@ def Home(request):
 
 def BookingView(request):
 
-	args = {'cabin_search_form': forms.CabinSearch()}
+	args = {
+		'cabin_search_form': forms.CabinSearch(),
+		'min_from_date' : AdminSettings.objects.first().min_from_date,
+	}
 
 	args = add_alerts_from_session(request, args)
 
@@ -53,7 +60,8 @@ def ShowCabins(request):
 		return redirect('booking')
 
 	args = {
-		'cabin_search_form_data': cabin_search_form.cleaned_data
+		'cabin_search_form_data': cabin_search_form.cleaned_data,
+		'min_from_date' : AdminSettings.objects.first().min_from_date,
 	}
 
 	#Retrieve booking action
@@ -100,9 +108,11 @@ def BookingOverview(request):
 	request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
 
 	#Declare arguments
-	args = {}
-	args['choose_form'] = forms.CabinChoose(request.POST)
-	args['cabin_search_form'] = cabin_search_form
+	args = {
+		'min_from_date' : AdminSettings.objects.first().min_from_date,
+		'choose_form': 	forms.CabinChoose(request.POST),
+		'cabin_search_form': cabin_search_form,
+	}
 
 
 	action = 'show'
@@ -191,7 +201,7 @@ def ChargeBooking(request):
 		return redirect('booking_overview')
 
 	#Check that booking dates are valid
-	if not t_booking.from_date_is_valid():
+	if not t_booking.dates_are_valid():
 		request.session = add_alert(request, "Bestilling ikke lengre gydlig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 		return redirect('booking')
 
@@ -264,7 +274,10 @@ def ChargeBooking(request):
 		'from_date': booking.from_date.strftime('%d.%m.%Y'),
 		'to_date': booking.to_date.strftime('%d.%m.%Y'),
 		'cabin_titles': titles,
+		'host': request.get_host() ,
 	}
+
+	checkmark_url = request.build_absolute_uri() 
 
 	msg_plain = render_to_string('email/confirmation.txt', data)
 	msg_html = render_to_string('email/confirmation.html', data)
@@ -357,7 +370,7 @@ def ShowCabins_show(request, _args):
 		no_cabins = True
 
 	#Check that dates are valid
-	if not booking_dates_check(from_date, to_date) == True:
+	if TentativeBooking.booking_dates_are_valid(from_date, to_date) == False:
 		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type='warning')
 		return redirect('booking')
 
@@ -374,6 +387,7 @@ def ShowCabins_show(request, _args):
 		'to_date_str': to_date_str,
 		'no_cabins': no_cabins,
 		'action': _args['action'],
+		'min_from_date': AdminSettings.min_from_date,
 	}
 
 	args = add_alerts_from_session(request, args)
@@ -415,9 +429,8 @@ def BookingOverview_show(request, _args):
 		return redirect('show_cabins')	
 
 	#Check that booking dates are valid
-	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
-		message = booking_dates_check(t_booking.from_date, t_booking.to_date)
-		request.session = add_alert(request, message, type="warning")
+	if not t_booking.from_date_is_valid() == True:
+		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type="warning")
 		request.session['t_booking_id'] = None
 		return redirect('show_cabins')
 
@@ -558,18 +571,6 @@ def deactivate_session_t_booking(request):
 		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
 		if not t_booking == None:
 			t_booking.deactivate()
-
-def booking_dates_check(_from_date, _to_date):
-	check = True
-	now = datetime.datetime.now().date()
-
-	if _from_date >= _to_date:
-		check = "Utsjekk må være etter innjekk."
-	elif _from_date <= now: 
-		check = "Innsjekk må være etter i dag."
-
-	return check
-
 
 def get_t_booking(request):
 	if 't_booking_id' in request.session:

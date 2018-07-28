@@ -8,7 +8,7 @@
 	<h1>Strandbu Camping - Bekreftelse</h1>
 	<p>{{ from_date }} - {{ to_date }}</p>
 
-	<img style="width: 100px;" src="{% static 'images/checkmark.png' %}"/>
+	<img style="width: 100px;" src="{{ host }}{% static 'images/checkmark.png' %}"/>
 	<p>Dette er en bekreftelse på følgende bestilling:</p>
 	{% for t in cabin_titles %}
 	<p>- {{ t }}</p>
