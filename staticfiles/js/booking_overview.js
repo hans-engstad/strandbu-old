@@ -65,3 +65,12 @@ $('#info-form').on('submit', function(e){
 window.addEventListener('popstate', function() {
   handler.close();
 });
+
+
+$('#accept-conditions-checkbox').change(
+    function(){
+        if ($(this).is(':checked')) {
+            //Hide conditions-error
+            $('#conditions-error').addClass('hide');
+        }
+    });

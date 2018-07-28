@@ -66,9 +66,6 @@ $('#daterange-to-date').daterangepicker({
 	}
 );
 
-
-
-
 function daterangeSetup(){
 	
 	if($('#id_from_date').length)
@@ -81,12 +78,16 @@ function daterangeSetup(){
 		endString = $('#id_to_date').val();
 	}
 
-	$('#daterange-from-date').data('daterangepicker').setStartDate(startString);
-	$('#daterange-from-date').data('daterangepicker').setEndDate(startString);
-
-
-	$('#daterange-to-date').data('daterangepicker').setStartDate(endString);
-	$('#daterange-to-date').data('daterangepicker').setEndDate(endString);
+	if($('#daterange-from-date').length)
+	{
+		$('#daterange-from-date').data('daterangepicker').setStartDate(startString);
+		$('#daterange-from-date').data('daterangepicker').setEndDate(startString);
+	} 
+	if($('#daterange-to-date').length)
+	{
+		$('#daterange-to-date').data('daterangepicker').setStartDate(endString);
+		$('#daterange-to-date').data('daterangepicker').setEndDate(endString);
+	}
 }
 
 
