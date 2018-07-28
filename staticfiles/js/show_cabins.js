@@ -23,6 +23,8 @@ function ChangeSearchHide(){
 }
 
 function BackToOverview(){
-	console.log("Submitting");
 	$('#back-to-overview-form').submit();
 }
+
+
+

@@ -42,104 +42,46 @@ def BookingView(request):
 
 def ShowCabins(request):
 
-
+	#Retrieve cabin search form
 	cabin_search_form = forms.CabinSearch(request.POST)
 	if 'cabin_search_form_data' in request.session and not cabin_search_form.is_valid():
 		cabin_search_form = forms.CabinSearch(request.session['cabin_search_form_data'])
-	elif not request.method == 'POST':
-		return HttpResponse('Request method must be POST.')
 
-	if cabin_search_form.is_valid():
-		#Check database for search results
+	#Check that search form is valid
+	if not cabin_search_form.is_valid():
+		request.session = add_alert(request, 'Ugyldig søk. Vennligst prøv igjen', type='warning')
+		return redirect('booking')
 
-		from_date = datetime.datetime.strptime(cabin_search_form.cleaned_data['from_date'], "%d.%m.%y").date()
-		to_date = datetime.datetime.strptime(cabin_search_form.cleaned_data['to_date'], "%d.%m.%y").date()
-		# persons = cabin_search_form.cleaned_data['persons']
+	args = {
+		'cabin_search_form_data': cabin_search_form.cleaned_data
+	}
 
-		if not booking_dates_check(from_date, to_date) == True:
-			request.session = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen.')
-			return redirect('booking')
+	#Retrieve booking action
+	action = 'show'
+	if 'action' in request.POST:
+		print("SETTING ACTION")
+		print(request.POST)
+		action = request.POST['action']
 
+	
+	#Defualt value is to not add cabin (used for displaying template correct)
+	args['action'] = action
 
-		
-		t_booking = None
-		t_booking_id = -1
-		adding_cabin = False
-		if 'booking_action' in request.POST:
-			if request.POST.get('booking_action') == 'add_cabin':
-				t_booking_id = request.POST.get('t_booking_id')
-				adding_cabin = True
-		elif 't_booking_id' in request.session:
-			#Deactivate t_booking if we are not adding cabin. 
-			t_booking = Booking.objects.filter(id=request.session['t_booking_id']).first()
-			if not t_booking == None:
-				t_booking.deactivate()
-			request.session['t_booking_id'] = None
-
-		cabins = Booking.get_available_cabins(from_date, to_date, t_booking=t_booking)
-
-		cabins = Booking.remove_similar_cabins(cabins)
-
-		
-
-
-		cabins_dict = {}
-		for c in cabins:
-			res = {}
-			res['number'] = c.number
-			res['persons'] = c.persons
-			res['title'] = c.title
-			res['short_description'] = c.short_description
-			res['long_description'] = c.long_description
-			res['equipment'] = c.equipment.all().values_list('eqp', flat=True)
-			res['images'] = c.images.all().values_list('img', flat=True) 
-			res['price_kr'] = c.price_kr
-
-			cabin_choose_data = {
-				'from_date': cabin_search_form.cleaned_data['from_date'],
-				'to_date': cabin_search_form.cleaned_data['to_date'],
-				'cabin_number': c.number.__str__(),
-				't_booking_id': t_booking_id,
-				'action': 'add_cabin',
-			}
-
-			res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
-
-			cabins_dict['cabin_' + c.number.__str__()] = res
-
-		info_header = ""
-
-		no_cabins = False
-		if cabins.count() == 0:
-			info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
-			no_cabins = True
-		
-
-		from_date_str = datetime.datetime.strftime(from_date, "%d.%m.%y")
-		to_date_str = datetime.datetime.strftime(to_date, "%d.%m.%y")
-
-
-		args = {
-			'cabins' : cabins_dict, 
-			'cabin_search_form': cabin_search_form, 
-			'info_header': info_header, 
-			'from_date_str': from_date_str, 
-			'to_date_str': to_date_str,
-			'no_cabins': no_cabins,
-			'adding_cabin': adding_cabin,
-		}
-
-		print(args)
-
-		args = add_alerts_from_session(request, args)
-
-		return render(request, 'main/show_cabins.html', args)
+	#Show correct view
+	if action == 'show':
+		print("SHOW")
+		return ShowCabins_show(request, args)
+	elif action == 'add_cabin':
+		print("ADD")
+		return ShowCabins_add_cabin(request, args)
 	else:
-		print(cabin_search_form.errors)
-		#TODO: kan sende en redirect til home page, der error meldigen blir sendt med og vises frem 
-		#	på det spesifiserte feltet
-		return HttpResponse("Input did not pass form validation")
+		print("SHOW")
+		#Not valid action
+		print("Warning: \"" + action + "\" is not a recognized action. ")
+		return ShowCabins_show(request, args)
 
+	
+	
 		
 # @never_cache
 def BookingOverview(request):
@@ -178,161 +120,6 @@ def BookingOverview(request):
 		print("Warning: \"" + action + "\" is not a recognized action. ")
 		return BookingOverview_show(request, args)
 
-	"""
-
-	if choose_form.is_valid():
-
-		action = choose_form.cleaned_data['action']
-		if action == 'add_cabin':
-			#Find session t_booking if any
-			if 't_booking_id' in request.session:
-				tmp_id = request.session['t_booking_id']
-				t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
-				if not t_booking == None:
-					if t_booking.is_active():
-						t_booking_id = tmp_id
-
-			#Note: Form field will override session if not -1
-			t_booking_id_form = choose_form.cleaned_data['t_booking_id']
-			if not t_booking_id_form == -1:
-				t_booking_id = t_booking_id_form
-		else:
-			t_booking_id = -1
-			deactivate_session_t_booking(request)
-
-	remove_cabin_num = -1
-	if 'action' in request.POST:
-		if request.POST['action'] == 'show':
-			#Find session t_booking if any
-			if 't_booking_id' in request.session:
-				tmp_id = request.session['t_booking_id']
-				t_booking = TentativeBooking.objects.filter(id=tmp_id).first()
-				if not t_booking == None:
-					if t_booking.is_active():
-						t_booking_id = tmp_id
-		elif request.POST['action'] == 'remove_cabin':
-			if not 'cabin_number' in request.POST:
-				request.session = add_alert(request, "Klarer ikke fjerne hytte. Vennligst prøv å lag ny bestilling.", type='danger')
-			else:
-				remove_cabin_num = request.POST['cabin_number']
-
-
-	if t_booking_id == -1:
-		if not choose_form.is_valid():
-			return HttpResponse("Choose form did not pass validation" + choose_form.errors.__str__())
-		#create tentative booking
-		from_date = datetime.datetime.strptime(choose_form.cleaned_data['from_date'], "%d.%m.%y").date()
-		to_date = datetime.datetime.strptime(choose_form.cleaned_data['to_date'], "%d.%m.%y").date()
-
-		number = choose_form.cleaned_data['cabin_number']
-		cabin = Cabin.objects.filter(number=number)
-
-		t_booking_id = Booking.create_booking(from_date, to_date, cabin, False)
-		if t_booking_id == False:
-			#Booking no longer valid, redirect to show_cabins	
-			request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-			request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
-
-			return redirect('show_cabins')
-	else:
-		#t_booking already exist
-		t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
-		
-		if not t_booking.is_active():
-			#Booking expired, try creating new
-			t_booking_id = t_booking.create_active_copy()
-			if not t_booking_id:
-				#Unable to create copy-booking
-				request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-				request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
-
-				return redirect('show_cabins')
-
-			t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
-
-		#add cabin to this booking if choose form is valid
-		if choose_form.is_valid():
-			number = choose_form.cleaned_data['cabin_number']
-			cabin = Cabin.objects.filter(number=number).first()
-
-			if cabin in t_booking.cabins.all():
-				request.session = add_alert(request, 'Valgt hytte er allerede lagt til. Bruk "Legg til hytte" knappen for å legge til flere.', type='primary')
-			elif not cabin.is_available(t_booking.from_date, t_booking.to_date):
-				#Cabin no longer avilable, try finding equivalent cabin
-				eq_cabin = cabin.get_available_eq_cabin()
-				if not eq_cabin:
-					#No eq-cabins are available
-					request.session = add_alert(request, 'Sesjon utløpt. Vennligst prøv igjen', type='primary')
-					request.session['cabin_search_form_data'] = cabin_search_form.cleaned_data
-					return redirect('show_cabins')
-				cabin = eq_cabin
-			print("___" + t_booking.__str__())
-			t_booking.cabins.add(cabin)
-			t_booking.save()
-
-
-	#Current tentative booking
-	t_booking = TentativeBooking.objects.filter(id=t_booking_id).first()
-
-	#Check that we have found a tentative booking
-	if t_booking == None:
-		return HttpResponse('Could not find tentative booking with id')
-
-	#Check if tentative booking session is expired
-	if not t_booking.is_active():
-		return HttpResponse('Session expired')
-
-	#Check that booking dates are valid
-	if not booking_dates_check(t_booking.from_date, t_booking.to_date) == True:
-		return HttpResponse(booking_dates_check(t_booking.from_date, t_booking.to_date))
-
-	print(t_booking.__str__())
-
-	if not remove_cabin_num == -1:
-		cabin_to_remove = Cabin.objects.get(number=remove_cabin_num)
-		print(cabin_to_remove)
-		print(t_booking.cabins.all())
-		t_booking.cabins.remove(cabin_to_remove)
-		t_booking.save()
-		print(t_booking.cabins.all())
-
-
-	cabins = {}
-	for c in t_booking.cabins.all():
-		cabins['cabin_' + c.number.__str__()] = {
-			'number': c.number,
-			'title': c.title,
-		}
-
-	request.session['t_booking_id'] = t_booking_id
-
-	t_booking_info = {
-		'cabins': cabins,
-		'from_date': t_booking.from_date.strftime('%d.%m.%Y'),
-		'to_date': t_booking.to_date.strftime('%d.%m.%Y'),
-		'price': t_booking.get_price(),
-		'id': t_booking.id,
-		'JSON': serializers.TentativeBookingSerializer(t_booking).data,
-	}
-
-
-	
-
-	args = {
-		't_booking': t_booking_info, 
-		'info_form': forms.PreChargeInfoForm(), 
-		'cabin_search_form': cabin_search_form, 
-	}
-
-	args = add_alerts_from_session(request, args)
-
-	
-
-	return render(request, 'main/booking_overview.html', args)
-
-	"""
-	return HttpResponse("hey")
-
 
 def ChargeBooking(request):
 
@@ -357,8 +144,8 @@ def ChargeBooking(request):
 	#Retrieve charge form
 	charge_form = forms.ChargeForm(request.POST)
 	if not charge_form.is_valid():
-		print(form.errors)
-		return HttpResponse("Payment form did not pass validation. Aborting payment. Booking not created.")
+		request.session = add_alert(request, 'Klarer ikke fullføre betaling. Vennligst prøv igjen.', type='danger', starter='OBS!')
+		return redirect('booking_overview')
 
 	#Retrieve charge data from charge form
 	charge_data = charge_form.cleaned_data
@@ -504,6 +291,106 @@ def BookingConfirmation(request):
 
 
 
+def ShowCabins_show(request, _args):
+
+	#Get t_booking, if any
+	t_booking = get_t_booking(request)
+
+	#Retrieve search form data
+	search_form_data = _args['cabin_search_form_data']
+
+	#Retrieve dates
+	from_date = datetime.datetime.strptime(search_form_data['from_date'], "%d.%m.%y").date()
+	to_date = datetime.datetime.strptime(search_form_data['to_date'], "%d.%m.%y").date()
+
+	#Get available cabins, if t_booking is None it will be ignored in get_available_cabins method
+	cabins = Booking.get_available_cabins(from_date, to_date, t_booking=t_booking)
+	if _args['action'] == 'add_cabin':
+		#Remove t_booking cabins
+		cabins = Booking.remove_cabins_from_set(cabins, t_booking)
+
+	#Remove equivalent cabins
+	cabins = Booking.remove_similar_cabins(cabins)
+
+	#Deactivate t_booking if we are not adding cabin. 
+	if _args['action'] == 'show':
+		if not t_booking == None:
+			t_booking.deactivate()
+		request.session['t_booking_id'] = None		
+
+	#Declare t_booking_id
+	t_booking_id = None
+	if not t_booking == None:
+		t_booking_id = t_booking.id
+
+	#Create cabin dict with information about all cabins
+	cabins_dict = {}
+	for c in cabins:
+		res = {}
+		res['number'] = c.number
+		res['persons'] = c.persons
+		res['title'] = c.title
+		res['short_description'] = c.short_description
+		res['long_description'] = c.long_description
+		res['equipment'] = c.equipment.all().values_list('eqp', flat=True)
+		res['images'] = c.images.all().values_list('img', flat=True) 
+		res['price_kr'] = c.price_kr
+
+		cabin_choose_data = {
+			'from_date': search_form_data['from_date'],
+			'to_date': search_form_data['to_date'],
+			'cabin_number': c.number.__str__(),
+			't_booking_id': t_booking_id,
+			'action': 'add_cabin',
+		}
+
+		res['choose_form_single'] = forms.CabinChoose(initial=cabin_choose_data)
+
+		cabins_dict['cabin_' + c.number.__str__()] = res
+
+	#Declare info header, displayed on top of page
+	info_header = ""
+
+	no_cabins = False
+	if cabins.count() == 0:
+		info_header = "Det er desverre ingen hytter som er ledig hele denne perioden."
+		no_cabins = True
+
+	#Check that dates are valid
+	if not booking_dates_check(from_date, to_date) == True:
+		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type='warning')
+		return redirect('booking')
+
+	#Convert dates to string
+	from_date_str = datetime.datetime.strftime(from_date, "%d.%m.%y")
+	to_date_str = datetime.datetime.strftime(to_date, "%d.%m.%y")
+
+
+	args = {
+		'cabins' : cabins_dict, 
+		'cabin_search_form': forms.CabinSearch(search_form_data), 
+		'info_header': info_header, 
+		'from_date_str': from_date_str, 
+		'to_date_str': to_date_str,
+		'no_cabins': no_cabins,
+		'action': _args['action'],
+	}
+
+	args = add_alerts_from_session(request, args)
+
+	return render(request, 'main/show_cabins.html', args)
+
+
+def ShowCabins_add_cabin(request, _args):
+
+	#Add cabin to t_booking
+	t_booking = get_valid_t_booking(request)
+
+	if t_booking == False:
+		request.session = add_alert(request, 'Klarer ikke legge til hytte. Finner ikke bestilling. Vennligst prøv igjen.', type='warning')
+		return redirect('show_cabins')
+
+	return ShowCabins_show(request, _args)
 
 #Show current booking overview based on session
 def BookingOverview_show(request, _args):
@@ -660,7 +547,6 @@ def add_alert(request, _alert, **kwargs):
 			alerts = request.session['alerts']
 
 	alerts.append((_alert, a_type, a_starter))
-	print(alerts)
 	request.session['alerts'] = alerts
 
 	return request.session
@@ -676,10 +562,6 @@ def deactivate_session_t_booking(request):
 def booking_dates_check(_from_date, _to_date):
 	check = True
 	now = datetime.datetime.now().date()
-
-
-	print(type(_from_date))
-	print(type(now))
 
 	if _from_date >= _to_date:
 		check = "Utsjekk må være etter innjekk."

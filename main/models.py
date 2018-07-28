@@ -45,6 +45,7 @@ class Cabin(models.Model):
 	def price_kr(self):
 		return int(self.price * 0.01)
 
+
 	def is_available(self, _from_date, _to_date):
 		bookings = Booking.get_bookings(_from_date, _to_date)
 		for booking in bookings:
@@ -230,6 +231,23 @@ class Booking(PolymorphicModel):
 				ids.append(cabin.id)
 		return Cabin.objects.filter(id__in=ids)
 
+	@classmethod 
+	def remove_cabins_from_set(cls, _all_cabins, _t_booking):
+		#Removes the cabins in t_booking from the all_cabins set
+		if _t_booking == None:
+			return _all_cabins
+		ids = []
+		for cabin in _all_cabins:
+			match = False
+			for booking_cabin in _t_booking.cabins.all():
+				if cabin.number == booking_cabin.number:
+					match = True
+					break;
+			if match == False:
+				ids.append(cabin.id)
+		return Cabin.objects.filter(id__in=ids)
+
+
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
@@ -294,7 +312,7 @@ class TentativeBooking(Booking):
 
 		if self.from_date >= self.to_date:
 			return False
-			
+
 		return True
 
 			

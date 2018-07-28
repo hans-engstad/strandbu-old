@@ -9,7 +9,7 @@
 		
 		<div class="cabin-search-result row">
 			<div class="col">
-				{% if adding_cabin %}
+				{% if action == 'add_cabin' %}
 					<a class="default-link" href="#" onClick="BackToOverview()">Tilbake til oversikt</a>
 				{% endif %}
 			</div>
@@ -17,7 +17,7 @@
 				<span style="text-decoration: underline;">{{ from_date_str }} - {{ to_date_str }}</span> 
 			</div>
 			<div class="col center-hor">
-				{% if not adding_cabin %}
+				{% if not action == 'add_cabin' %}
 					<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
 				{% endif %}
 			</div>
@@ -139,7 +139,7 @@
 				
 			{% endfor %}
 
-			{% if  adding_cabin %}
+			{% if  action == 'add_cabin' %}
 				<div class="center-hor">
 					<form id="back-to-overview-form" method="POST" action="{% url 'booking_overview' %}" >
 						<div class="hide">
@@ -152,7 +152,6 @@
 					</form>
 				</div>
 			{% endif %}
-
 		</div>
 	</div>
 </div>

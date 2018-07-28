@@ -93,7 +93,7 @@
 		<form id="add-cabin-form" action="{% url 'show_cabins' %}" method="POST" >
 			{% csrf_token %}
 			<input name="t_booking_id" value="{{ t_booking.id }}" />
-			<input name="booking_action" value="add_cabin" />
+			<input name="action" value="add_cabin" />
 			{{ cabin_search_form }}
 		</form>
 		{% for key, cabin in t_booking.cabins.items %}
@@ -107,7 +107,10 @@
 	</div>
 </div>
 
-<script src="https://checkout.stripe.com/checkout.js"></script>
 
+{% endblock %}
 
+{% block js %}
+	<script src="https://checkout.stripe.com/checkout.js"></script>
+	<script src="{% static 'js/booking_overview.js'%}"></script>
 {% endblock %}
