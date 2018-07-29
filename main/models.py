@@ -15,12 +15,35 @@ class AdminSettings(models.Model):
 	
 	max_to_date = models.IntegerField(default=365, help_text="Max days from today for to_date that customer can book cabin.")
 
-	max_date_span = models.IntegerField(default=365, help_text="Max days for booking")
+	max_date_span = models.IntegerField(default=30, help_text="Max days for booking")
 
+	booking_close_time = models.TimeField(null=True, help_text="Time booking will close, if min_from_date is 0. (if customer can book today).")
 
 	last_edit_date = models.DateTimeField(auto_now=True)
 
 
+	@classmethod
+	def booking_closed_time(cls, _from_date):
+
+		now = timezone.now()
+
+		#Open if from_date is after today
+		if _from_date > now.date():
+			print(1)
+			return False
+
+		if now.time() > AdminSettings.objects.first().booking_close_time:
+			print(2)
+			return True
+
+		print(3)
+		return False
+		
+
+
+	@classmethod
+	def get_min_from_date(cls):
+		return AdminSettings.objects.first().min_from_date
 
 
 	def save(self, *args, **kwargs):
@@ -160,7 +183,7 @@ class Booking(PolymorphicModel):
 			#Check that booking dates are valid
 			if booking.from_date >= booking.to_date:
 				return False
-			now = datetime.datetime.now().date()
+			now = timezone.now().date()
 			if booking.from_date <= now:
 				return False
 
@@ -270,7 +293,6 @@ class Booking(PolymorphicModel):
 		return Cabin.objects.filter(id__in=ids)
 
 
-
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))
 		price = 0
@@ -298,26 +320,19 @@ class TentativeBooking(Booking):
 	@classmethod
 	def booking_dates_are_valid(cls, _from_date, _to_date):
 		#Check that checkin is after today + AdminSettings days
-		now = datetime.datetime.now().date()
+		now = timezone.now().date()
 
 		settings = AdminSettings.objects.first()
 
 		minCheckin = now + datetime.timedelta(days=settings.min_from_date)
 		maxCheckin = now + datetime.timedelta(days=settings.max_from_date)
 
-
-		print('min: ' + minCheckin.__str__())
-		print('from: ' + _from_date.__str__())
-
 		if _from_date < minCheckin:
-			print(1)
 			return False
 		if _from_date > maxCheckin:
-			print(2)
 			return False
 
 		if _from_date >= _to_date:
-			print(3)
 			return False
 
 		day_span = len(get_dates_between(_from_date, _to_date))

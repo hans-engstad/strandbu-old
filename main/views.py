@@ -67,8 +67,6 @@ def ShowCabins(request):
 	#Retrieve booking action
 	action = 'show'
 	if 'action' in request.POST:
-		print("SETTING ACTION")
-		print(request.POST)
 		action = request.POST['action']
 
 	
@@ -77,13 +75,10 @@ def ShowCabins(request):
 
 	#Show correct view
 	if action == 'show':
-		print("SHOW")
 		return ShowCabins_show(request, args)
 	elif action == 'add_cabin':
-		print("ADD")
 		return ShowCabins_add_cabin(request, args)
 	else:
-		print("SHOW")
 		#Not valid action
 		print("Warning: \"" + action + "\" is not a recognized action. ")
 		return ShowCabins_show(request, args)
@@ -374,11 +369,15 @@ def ShowCabins_show(request, _args):
 		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type='warning')
 		return redirect('booking')
 
+	if AdminSettings.booking_closed_time(from_date):
+		request.session = add_alert(request, 'Bestilling stengt for i dag. Ta kontakt (+47) 777 15 340 for bestilling.', type='warning')
+		return redirect('booking')
+
 	#Convert dates to string
 	from_date_str = datetime.datetime.strftime(from_date, "%d.%m.%y")
 	to_date_str = datetime.datetime.strftime(to_date, "%d.%m.%y")
 
-
+	#Declare arguments
 	args = {
 		'cabins' : cabins_dict, 
 		'cabin_search_form': forms.CabinSearch(search_form_data), 
