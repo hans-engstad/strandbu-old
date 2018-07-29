@@ -73,6 +73,8 @@ def ShowCabins(request):
 	#Defualt value is to not add cabin (used for displaying template correct)
 	args['action'] = action
 
+
+
 	#Show correct view
 	if action == 'show':
 		return ShowCabins_show(request, args)

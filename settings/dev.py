@@ -1,1 +1,0 @@
-from strandbu.settings.base import *

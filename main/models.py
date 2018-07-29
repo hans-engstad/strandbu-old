@@ -25,18 +25,15 @@ class AdminSettings(models.Model):
 	@classmethod
 	def booking_closed_time(cls, _from_date):
 
-		now = timezone.now()
+		now = timezone.localtime(timezone.now())
 
 		#Open if from_date is after today
 		if _from_date > now.date():
-			print(1)
 			return False
 
 		if now.time() > AdminSettings.objects.first().booking_close_time:
-			print(2)
 			return True
 
-		print(3)
 		return False
 		
 
@@ -142,7 +139,7 @@ class Booking(PolymorphicModel):
 			#check that booking is in future
 			from_date_datetime = datetime.datetime.combine(_from_date, datetime.datetime.min.time())
 			from_date_datetime_tz = pytz.timezone(timezone.get_default_timezone_name()).localize(from_date_datetime)
-			if timezone.now() >= from_date_datetime_tz:
+			if timezone.localtime(timezone.now()) >= from_date_datetime_tz:
 				print(1)
 				return False
 
@@ -183,7 +180,7 @@ class Booking(PolymorphicModel):
 			#Check that booking dates are valid
 			if booking.from_date >= booking.to_date:
 				return False
-			now = timezone.now().date()
+			now = timezone.localtime(timezone.now()).date()
 			if booking.from_date <= now:
 				return False
 
@@ -320,7 +317,7 @@ class TentativeBooking(Booking):
 	@classmethod
 	def booking_dates_are_valid(cls, _from_date, _to_date):
 		#Check that checkin is after today + AdminSettings days
-		now = timezone.now().date()
+		now = timezone.localtime(timezone.now()).date()
 
 		settings = AdminSettings.objects.first()
 
@@ -342,14 +339,14 @@ class TentativeBooking(Booking):
 		return True
 
 	def set_updated_time_now(self):
-		self.last_updated_time = timezone.now()
+		self.last_updated_time = timezone.localtime(timezone.now())
 
 	def is_active(self):
 		if not self.active:
 			return False
 		idle_max_time = 10
 		
-		if timezone.now() >= self.last_updated_time + datetime.timedelta(minutes=idle_max_time):
+		if timezone.localtime(timezone.now()) >= self.last_updated_time + datetime.timedelta(minutes=idle_max_time):
 			return False
 		return True
 
