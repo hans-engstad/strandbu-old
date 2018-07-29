@@ -15,6 +15,7 @@ var endString = end.getDate() + "." + (end.getMonth() + 1) + "." + end.getFullYe
 
 
 
+
 $('#daterange-from-date').daterangepicker({
 	singleDatePicker: true,
 	opens: 'center',

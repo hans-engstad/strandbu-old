@@ -387,8 +387,10 @@ def ShowCabins_show(request, _args):
 		'to_date_str': to_date_str,
 		'no_cabins': no_cabins,
 		'action': _args['action'],
-		'min_from_date': AdminSettings.min_from_date,
 	}
+
+	#Merge args. Note args will override fields in _args
+	args = {**_args, **args}
 
 	args = add_alerts_from_session(request, args)
 
@@ -429,7 +431,7 @@ def BookingOverview_show(request, _args):
 		return redirect('show_cabins')	
 
 	#Check that booking dates are valid
-	if not t_booking.from_date_is_valid() == True:
+	if not t_booking.dates_are_valid() == True:
 		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type="warning")
 		request.session['t_booking_id'] = None
 		return redirect('show_cabins')
