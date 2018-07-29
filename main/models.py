@@ -316,27 +316,41 @@ class TentativeBooking(Booking):
 
 	@classmethod
 	def booking_dates_are_valid(cls, _from_date, _to_date):
+		if cls.booking_dates_get_error(_from_date, _to_date) == None:
+			return True
+		return False
+
+	@classmethod
+	def booking_dates_get_error(cls, _from_date, _to_date):
 		#Check that checkin is after today + AdminSettings days
 		now = timezone.localtime(timezone.now()).date()
 
 		settings = AdminSettings.objects.first()
 
-		minCheckin = now + datetime.timedelta(days=settings.min_from_date)
-		maxCheckin = now + datetime.timedelta(days=settings.max_from_date)
+		min_checkin = now + datetime.timedelta(days=settings.min_from_date)
+		max_checkin = now + datetime.timedelta(days=settings.max_from_date)
 
-		if _from_date < minCheckin:
-			return False
-		if _from_date > maxCheckin:
-			return False
+		#Check that from_date is after min_checkin
+		if _from_date < min_checkin:
+			days_text = "dager"
+			if settings.min_from_date == 1:
+				days_text = "dag"
+			return "Innsjekk må være minst " + settings.min_from_date.__str__() + " " + days_text + " etter i dag. Vennligst kontakt oss på (+47) 777 15 340 for å bestille." 
 
+		#Check that from_date is before max_checkin
+		if _from_date > max_checkin:
+			return "Innsjekk for langt frem i tid. Vennligst kontakt oss for bestilling."
+
+		#Check that checkin is before checkout
 		if _from_date >= _to_date:
-			return False
+			return "Innsjekk må være før utsjekk. Vennligst prøv igjen."
 
+		#Check that booking is less than max_date span
 		day_span = len(get_dates_between(_from_date, _to_date))
 		if day_span > settings.max_date_span:
-			return False
+			return "Kan ikke lage bestilling på mer enn " + settings.max_date_span.__str__() + " dager. Vennligst ta kontakt for bestilling."
+		return None
 
-		return True
 
 	def set_updated_time_now(self):
 		self.last_updated_time = timezone.localtime(timezone.now())
@@ -370,7 +384,7 @@ class TentativeBooking(Booking):
 		return True
 
 	def dates_are_valid(self):
-		TentativeBooking.booking_dates_are_valid(self.from_date, self.to_date)
+		return TentativeBooking.booking_dates_are_valid(self.from_date, self.to_date)
 
 			
 

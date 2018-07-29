@@ -199,7 +199,7 @@ def ChargeBooking(request):
 
 	#Check that booking dates are valid
 	if not t_booking.dates_are_valid():
-		request.session = add_alert(request, "Bestilling ikke lengre gydlig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
+		request.session = add_alert(request, "Bestilling ikke lengre gyldig. Betaling ikke fullført. Vennligst prøv igjen.", type='danger', starter='OBS!')
 		return redirect('booking')
 
 	#Check that price displayed matches t_booking price
@@ -367,8 +367,9 @@ def ShowCabins_show(request, _args):
 		no_cabins = True
 
 	#Check that dates are valid
-	if TentativeBooking.booking_dates_are_valid(from_date, to_date) == False:
-		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type='warning')
+	date_error = TentativeBooking.booking_dates_get_error(from_date, to_date)
+	if not date_error == None:
+		request.session = add_alert(request, date_error, type='warning')
 		return redirect('booking')
 
 	if AdminSettings.booking_closed_time(from_date):
@@ -432,7 +433,7 @@ def BookingOverview_show(request, _args):
 		return redirect('show_cabins')	
 
 	#Check that booking dates are valid
-	if not t_booking.dates_are_valid() == True:
+	if t_booking.dates_are_valid() == False:
 		request.session = add_alert(request, 'Ugyldig datoer. Vennligst prøv igjen.', type="warning")
 		request.session['t_booking_id'] = None
 		return redirect('show_cabins')
