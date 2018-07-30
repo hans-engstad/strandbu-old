@@ -210,26 +210,21 @@ class Booking(PolymorphicModel):
 		_all_bookings = cls.get_relevant_bookings(_from_date, _to_date, _all_bookings)
 
 		if 't_booking' in kwargs:
-			_all_booking.exclude(kwargs['t_booking'])
-
-
+			_all_bookings = _all_bookings.exclude(id=kwargs['t_booking'].id)
 
 		#Check if cabins is available
 		for booking in _all_bookings:
-			print("-----------1")
-			print(booking.__str__())
 			for booking_cabin in booking.cabins.all():
-				print("---------2")
-				print(booking_cabin.__str__())
 				for cabin in _cabins:
-					print("----------3")
-					print(cabin.__str__())
 					if cabin.number == booking_cabin.number:
 						return "Hytte ikke lengre ledig. Vennligst prøv igjen."
 
 		#Check booking dates
 		if not TentativeBooking.booking_dates_get_error(_from_date, _to_date) == None:
 			return TentativeBooking.booking_dates_get_error(_from_date, _to_date)
+
+		if AdminSettings.objects.first().booking_closed_time(_from_date):
+			return "Bestilling for i dag er stengt. Kontakt oss på (+47) 777 15 340 for bestilling."
 
 		return None
 
@@ -380,14 +375,12 @@ class TentativeBooking(Booking):
 		if not self.is_active():
 			return False
 
-		bookings = Booking.get_bookings(self.from_date, self.to_date)
-		for booking in bookings:
-			if booking.id == self.id:
-				continue
-			for booking_cabin in booking.cabins.all():
-				for this_cabin in self.cabins.all():
-					if this_cabin.number == booking_cabin.number:
-						return False
+		booking_error = Booking.get_create_booking_error(self.from_date, self.to_date, self.cabins.all(), Booking.objects.all(), t_booking=self)
+
+		print(booking_error)
+
+		if booking_error is not None:
+			return False
 
 		#Check that checkin is before checkout
 		if self.from_date >= self.to_date:

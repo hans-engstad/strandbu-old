@@ -74,7 +74,6 @@ def ShowCabins(request):
 	args['action'] = action
 
 
-
 	#Show correct view
 	if action == 'show':
 		return ShowCabins_show(request, args)
@@ -111,10 +110,14 @@ def BookingOverview(request):
 		'cabin_search_form': cabin_search_form,
 	}
 
+	print(request.POST)
 
 	action = 'show'
 	if 'action' in request.POST:
 		action = request.POST['action']
+
+
+	print("ACTION: " + action)
 
 	if action == 'show':
 		return BookingOverview_show(request, args)
@@ -474,6 +477,7 @@ def BookingOverview_add_cabin(request, _args):
 	choose_form = _args['choose_form']
 	if not choose_form.is_valid():
 		request.session = add_alert(request, 'Klarer ikke legge til hytte. Vennligst prøv igjen.', type='danger')
+		print("en")
 		return redirect('show_cabins')
 
 	#retrieve data from choose_form
@@ -495,7 +499,8 @@ def BookingOverview_add_cabin(request, _args):
 				booking_error = "En feil har oppstått. Vennligst prøv igjen."
 
 			request.session = add_alert(request, booking_error, type='primary')
-			return redirect('show_cabins')	
+			print("to")
+			return redirect('show_cabins')
 
 		t_booking = TentativeBooking.objects.get(id=t_booking_id)
 		request.session['t_booking_id'] = t_booking_id
@@ -507,11 +512,13 @@ def BookingOverview_add_cabin(request, _args):
 		if not t_booking.is_valid():
 			request.session = add_alert(request, "Bestilling ikke lengre gyldig. Vennligst prøv igjen.", type='primary')
 			t_booking.deactivate()
+			print("tre")
 			return redirect('show_cabins')
 	request.session['t_booking_id'] = t_booking.id
 
-	return BookingOverview_show(request, _args)
+	print("SESSION ID: " + t_booking_id.__str__())
 
+	return BookingOverview_show(request, _args)
 
 
 def BookingOverview_remove_cabin(request, _args):
@@ -593,6 +600,7 @@ def get_t_booking(request):
 
 def get_valid_t_booking(request):
 	t_booking = get_t_booking(request)
+	
 	if t_booking == None:
 		return False
 	if t_booking.is_valid():
