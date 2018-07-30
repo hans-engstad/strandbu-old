@@ -87,14 +87,18 @@ class Cabin(models.Model):
 	def price_kr(self):
 		return int(self.price * 0.01)
 
-
+	"""
 	def is_available(self, _from_date, _to_date):
-		bookings = Booking.get_bookings(_from_date, _to_date)
-		for booking in bookings:
-			for cabin in booking.cabins.all():
-				if cabin.number == self.number:
-					return False
-		return True
+		with transaction.atomic():
+			#will lock all bookings until the end of this transaction block
+			all_bookings = Booking.objects.all().select_for_update()
+
+			for booking in all_bookings:
+				for cabin in booking.cabins.all():
+					if cabin.number == self.number:
+						return False
+			return True
+	"""
 
 	def get_available_eq_cabins(self):
 		for cabin in self.equivalent_cabins.all():
@@ -135,28 +139,16 @@ class Booking(PolymorphicModel):
 	@classmethod
 	def create_booking(cls, _from_date, _to_date, _cabins, _is_final, **kwargs):
 		with transaction.atomic():
+			#will lock all bookings until the end of this transaction block. 
+			all_bookings = Booking.objects.all().select_for_update()
 
-			#check that booking is in future
-			from_date_datetime = datetime.datetime.combine(_from_date, datetime.datetime.min.time())
-			from_date_datetime_tz = pytz.timezone(timezone.get_default_timezone_name()).localize(from_date_datetime)
-			if timezone.localtime(timezone.now()) >= from_date_datetime_tz:
-				print(1)
+			booking_error = cls.get_create_booking_error(_from_date, _to_date, _cabins, all_bookings)
+			if booking_error is not None:
 				return False
-
-			all_bookings = Booking.objects.all().select_for_update()	#will lock all bookings until the end of this transaction block
 
 			#Get all bookings with given dates and active
 			bookings = Booking.get_bookings(_from_date, _to_date)
 
-			print(_cabins)
-			#Check if this is a valid booking
-			for cabin in _cabins:
-				if not cabin.is_available(_from_date, _to_date):
-					print(2)
-					print(cabin.__str__())
-					return False
-
-				
 			#Create booking model
 			booking = TentativeBooking()
 			if _is_final:
@@ -177,19 +169,10 @@ class Booking(PolymorphicModel):
 			if 'late_arrival' in kwargs:
 				booking.late_arrival = kwargs.get('late_arrival')
 
-			#Check that booking dates are valid
-			if booking.from_date >= booking.to_date:
-				return False
-			now = timezone.localtime(timezone.now()).date()
-			if booking.from_date <= now:
-				return False
-
 			#Validate booking fields
 			try:
 				booking.full_clean()
 			except ValidationError as e:
-				print(3)
-				pritn(e)
 				return False
 
 			#Save booking
@@ -222,6 +205,35 @@ class Booking(PolymorphicModel):
 
 
 	@classmethod
+	def get_create_booking_error(cls, _from_date, _to_date, _cabins, _all_bookings, **kwargs):
+		#Remove non-relevant bookings
+		_all_bookings = cls.get_relevant_bookings(_from_date, _to_date, _all_bookings)
+
+		if 't_booking' in kwargs:
+			_all_booking.exclude(kwargs['t_booking'])
+
+
+
+		#Check if cabins is available
+		for booking in _all_bookings:
+			print("-----------1")
+			print(booking.__str__())
+			for booking_cabin in booking.cabins.all():
+				print("---------2")
+				print(booking_cabin.__str__())
+				for cabin in _cabins:
+					print("----------3")
+					print(cabin.__str__())
+					if cabin.number == booking_cabin.number:
+						return "Hytte ikke lengre ledig. Vennligst prøv igjen."
+
+		#Check booking dates
+		if not TentativeBooking.booking_dates_get_error(_from_date, _to_date) == None:
+			return TentativeBooking.booking_dates_get_error(_from_date, _to_date)
+
+		return None
+
+	@classmethod
 	def get_available_cabins(cls, _from_date, _to_date, **kwargs):
 		#Get bookings that overlap with given dates and are active
 		bookings = cls.get_bookings(_from_date, _to_date)
@@ -232,9 +244,6 @@ class Booking(PolymorphicModel):
 			for cabin in booking.cabins.all():
 				if cabins_match(cabin, available_cabins):
 					available_cabins = available_cabins.exclude(number=cabin.number)
-
-		#Exclude cabins with not enough beds
-		# available_cabins = available_cabins.filter(persons__gte=_persons)
 
 		#Add cabins from t_booking session (if any)
 		if 't_booking' in kwargs:
@@ -248,16 +257,19 @@ class Booking(PolymorphicModel):
 	@classmethod
 	def get_bookings(cls, _from_date, _to_date):
 		bookings = Booking.objects.all()
-		dates_to_check = get_dates_between(_from_date, _to_date)
+		return cls.get_relevant_bookings(_from_date, _to_date, bookings)
 
-		for booking in bookings:
+	@classmethod
+	def get_relevant_bookings(cls, _from_date, _to_date, _all_bookings):
+		dates_to_check = get_dates_between(_from_date, _to_date)
+		for booking in _all_bookings:
 			booking_dates = get_dates_between(booking.from_date, booking.to_date)
 			if not booking.is_active():
-				bookings = bookings.exclude(id=booking.id)
+				_all_bookings = _all_bookings.exclude(id=booking.id)
 				continue
 			if not dates_overlap(dates_to_check, booking_dates):
-				bookings = bookings.exclude(id=booking.id)
-		return bookings
+				_all_bookings = _all_bookings.exclude(id=booking.id)
+		return _all_bookings
 
 	@classmethod
 	def remove_similar_cabins(cls, _cabins):

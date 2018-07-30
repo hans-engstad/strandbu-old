@@ -373,7 +373,7 @@ def ShowCabins_show(request, _args):
 		return redirect('booking')
 
 	if AdminSettings.booking_closed_time(from_date):
-		request.session = add_alert(request, 'Bestilling stengt for i dag. Ta kontakt (+47) 777 15 340 for bestilling.', type='warning')
+		request.session = add_alert(request, 'Bestilling for i dag er stengt. Ta kontakt (+47) 777 15 340 for bestilling.', type='warning')
 		return redirect('booking')
 
 	#Convert dates to string
@@ -487,12 +487,19 @@ def BookingOverview_add_cabin(request, _args):
 	if t_booking == None:
 		#Create t_booking
 		t_booking_id = Booking.create_booking(from_date, to_date, cabin, False)
-		request.session['t_booking_id'] = t_booking_id
+
 		if t_booking_id == False:
-			#Booking no longer valid, redirect to show_cabins	
-			request.session = add_alert(request, "Hytte ikke lengre ledig. Vennligst prøv igjen.", type='primary')
-			return redirect('show_cabins')
+			#NOTE: retrieving error based on booking without lock
+			booking_error = Booking.get_create_booking_error(from_date, to_date, cabin, Booking.objects.all())
+			if booking_error == None:
+				booking_error = "En feil har oppstått. Vennligst prøv igjen."
+
+			request.session = add_alert(request, booking_error, type='primary')
+			return redirect('show_cabins')	
+
 		t_booking = TentativeBooking.objects.get(id=t_booking_id)
+		request.session['t_booking_id'] = t_booking_id
+		
 	else:
 		#Add cabin to existing t_booking
 		t_booking.cabins.add(cabin.first())
