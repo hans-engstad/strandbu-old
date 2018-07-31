@@ -3,6 +3,8 @@ from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 import datetime
 from . import models
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 class CabinSearch(forms.Form):
 	from_date = forms.CharField()
@@ -55,6 +57,18 @@ class ChargeForm(forms.Form):
 	phone = forms.IntegerField()
 	late_arrival = forms.BooleanField(required=False)
 	t_booking_JSON = forms.CharField()
+
+
+class BookingAdminForm(forms.ModelForm):
+	time_widget = forms.widgets.TimeInput()
+	valid_time_formats = ['%H:%M:%S']
+
+	booking_close_time = forms.TimeField(widget=time_widget, input_formats=valid_time_formats)
+
+
+	class Meta:
+		model = models.AdminSettings
+		exclude = ('',)
 
 
 

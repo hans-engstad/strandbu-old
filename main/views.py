@@ -300,6 +300,46 @@ def BookingConfirmation(request):
 
 	return render(request, 'main/booking_confirmation.html', args)
 
+def BookingAdmin(request):
+
+	settings = AdminSettings.objects.first()
+
+	admin_form = forms.BookingAdminForm(instance=settings)
+	# admin_form.helper.form_action = reverse('booking_admin')
+
+
+
+
+	#Update Admin Settings
+	if request.method == 'POST':
+
+		admin_form = forms.BookingAdminForm(instance=settings,  data=request.POST)
+
+		if 'action' in request.POST:
+			action = request.POST['action']
+			print("ACTION: " + action)
+			if action == 'reset_to_default':
+				AdminSettings.reset_to_default()
+				admin_form = forms.BookingAdminForm(instance=AdminSettings.objects.first())
+			elif action == 'save_settings':
+				if not admin_form.is_valid():
+					request.session = add_alert(request, 'Klarer ikke oppdatere AdminSettings. Error: ' + admin_form.errors.__str__(), type='warning')
+				else:
+					admin_form.save()
+					request.session = add_alert(request, 'AdminSettings oppdatert', type='primary')
+
+	args = {'admin_form': admin_form}
+			
+
+	#Show admin settings
+	args = add_alerts_from_session(request, args)
+	
+	return render(request, 'main/booking_admin.html', args)
+
+
+	
+
+
 
 
 

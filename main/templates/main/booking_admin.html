@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+
+{% block body %}
+	<div class="default-page-bg">
+		<div class="container">
+			<br>
+			<h3 class="center-hor">Admin Settings</h3>
+			<br>
+			<div class="center-hor">
+				<form method="POST" action="{% url 'booking_admin' %}">
+					{% csrf_token %}
+					{% include 'main/standard_form_fields.html' with form=admin_form fields=admin_form.fields %}
+					<input type="hidden" name="action" value="save_settings" />
+					<div class="row">
+						<div>
+							<div class="col-sm center-hor">
+								<button 
+									type="button" 
+									class="btn float-right"
+									data-toggle="modal" 
+									data-target="#reset-to-default-modal"  >
+									Tilbakestill til standard
+								</button>
+							</div>
+						</div>
+						<div class="col-sm float-right">
+							<button type="submit" class="btn btn-primary float-right">Lagre</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="hide">
+		<form id="reset-to-default" method="POST" action="{% url 'booking_admin' %}" >
+			{% csrf_token %}
+			<input name="action" value="reset_to_default" />
+		</form>
+	</div>
+
+
+{% include 'main/modal.html' with id="reset-to-default-modal" modal_title="Er du sikker?" submit_text="Tilbakestill til standard" body="Vil du tilbakestille Admin instillingene til standard? Denne handlingen kan ikke gjøres om." onClick="resetToDefault()" %}
+
+
+{% endblock %}
+
+{% block js %}
+
+	<script type="text/javascript">
+
+		function resetToDefault(){
+			$('#reset-to-default').submit();
+		}
+
+	</script>
+
+{% endblock %}

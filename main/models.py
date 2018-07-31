@@ -17,7 +17,7 @@ class AdminSettings(models.Model):
 
 	max_date_span = models.IntegerField(default=30, help_text="Max days for booking")
 
-	booking_close_time = models.TimeField(null=True, help_text="Time booking will close, if min_from_date is 0. (if customer can book today).")
+	booking_close_time = models.TimeField(help_text="Time booking will close, if min_from_date is 0. (if customer can book today).", default="00:00:00")
 
 	last_edit_date = models.DateTimeField(auto_now=True)
 
@@ -42,6 +42,20 @@ class AdminSettings(models.Model):
 	def get_min_from_date(cls):
 		return AdminSettings.objects.first().min_from_date
 
+
+	@classmethod
+	def reset_to_default(cls):
+
+		print(AdminSettings.objects.all().__str__())
+
+		#Delete all instances
+		AdminSettings.objects.all().delete()
+
+		print(AdminSettings.objects.all().__str__())
+		#Create new instance
+		settings = AdminSettings.objects.create()
+		settings.save()
+		print(AdminSettings.objects.all().__str__())
 
 	def save(self, *args, **kwargs):
 		if AdminSettings.objects.exists() and not self.pk:
