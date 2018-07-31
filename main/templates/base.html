@@ -65,6 +65,19 @@
 						<li class="nav-item active">
 							<a class="nav-link" href="#">Kontakt oss<span class="sr-only">(current)</span></a>
 						</li>
+
+						{% if user.is_authenticated %}
+						<li class="nav-item active">
+							<a class="nav-link" href="#" onClick="logOut()" >Logg ut<span class="sr-only">(current)</span></a>
+						</li>
+						<div class="hide">
+							<form id="logout-form" action="{% url 'logout' %}" ></form>
+						</div>
+						{% endif %}
+
+						{% block nav_extra_links %}
+
+						{% endblock %}
 					</ul>
 				</div>
 			</div>
@@ -134,6 +147,13 @@
 		<script src="{% static 'js/show_cabins.js'%}"></script>
 		<script src="{% static 'js/booking_contact.js'%}"></script>
 		
+
+		<script type="text/javascript">
+			function logOut(){
+				$('#logout-form').submit()
+			}
+		</script>
+
 		{% block js %}
 
 		{% endblock %}

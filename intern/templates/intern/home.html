@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+	<div class="default-page-bg">
+		<div class="container">
+			<div class="col-md">
+				<br>
+				<h3 class="center-hor">Intern side</h3>
+				<br>
+				<div class="row">
+					<div class="col">
+						<div class="card-deck center-hor">
+							{% static 'images/booking_calendar.png' as img_src_1 %}
+							{% include 'intern/nav_box.html' with img_src=img_src_1 title_name='Booking' onClick='submitForm("show-booking-form")' %}
+
+							<form id="show-booking-form" action="{% url 'intern_booking' %}" ></form>
+
+							{% static 'images/booking_calendar.png' as img_src_1 %}
+							{% include 'intern/nav_box.html' with img_src=img_src_1 title_name='Booking' onClick='submitForm("show-admin-form' %}
+
+							<form id="show-admin-form" action="{% url 'booking_admin' %}" ></form>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block js %}
+
+	<script type="text/javascript">
+
+	function submitForm(formID){
+		$('#' + formID).submit();
+	}
+
+
+	</script>
+
+{% endblock %}
