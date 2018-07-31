@@ -9,4 +9,7 @@ urlpatterns = [
     url(r'^booking/overview$', views.BookingOverview, name="booking_overview"),
     url(r'^booking/charge$', views.ChargeBooking, name="charge_booking"),
     url(r'^booking/confirmation$', views.BookingConfirmation, name="booking_confirmation"),
+
+    url(r'^login$', views.LoginView, name="login"),
+
 ]

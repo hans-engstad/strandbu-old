@@ -17,7 +17,7 @@ class AdminSettings(models.Model):
 
 	max_date_span = models.IntegerField(default=30, help_text="Max days for booking")
 
-	booking_close_time = models.TimeField(help_text="Time booking will close, if min_from_date is 0. (if customer can book today).", default="00:00:00")
+	booking_close_time = models.TimeField(help_text="Time booking will close if min_from_date is 0. (if customer can book today).", default="18:00:00")
 
 	last_edit_date = models.DateTimeField(auto_now=True)
 

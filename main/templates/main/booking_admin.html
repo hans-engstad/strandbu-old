@@ -5,11 +5,17 @@
 	<div class="default-page-bg">
 		<div class="container">
 			<br>
-			<h3 class="center-hor">Admin Settings</h3>
 			<br>
+			<div class="container">
+				<button type="button" class="btn btn-primary">Tilbake til intern side</button>
+			</div>
 			<div class="center-hor">
 				<form method="POST" action="{% url 'booking_admin' %}">
 					{% csrf_token %}
+					<br>
+					<br>
+					<h3 class="center-hor">Admin Instillinger</h3>
+					<br>
 					{% include 'main/standard_form_fields.html' with form=admin_form fields=admin_form.fields %}
 					<input type="hidden" name="action" value="save_settings" />
 					<div class="row">
@@ -41,7 +47,7 @@
 	</div>
 
 
-{% include 'main/modal.html' with id="reset-to-default-modal" modal_title="Er du sikker?" submit_text="Tilbakestill til standard" body="Vil du tilbakestille Admin instillingene til standard? Denne handlingen kan ikke gjøres om." onClick="resetToDefault()" %}
+{% include 'main/modal.html' with id="reset-to-default-modal" modal_title="Er du sikker?" submit_text="Tilbakestill" body="Vil du tilbakestille Admin instillingene til standard? Denne handlingen kan ikke gjøres om." onClick="resetToDefault()" %}
 
 
 {% endblock %}

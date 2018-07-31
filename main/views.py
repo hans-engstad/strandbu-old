@@ -17,6 +17,7 @@ from rest_framework.renderers import JSONRenderer
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 import ast
+from django.contrib.auth import authenticate, login
 
 
 
@@ -302,34 +303,45 @@ def BookingConfirmation(request):
 
 def BookingAdmin(request):
 
+	if not request.user.is_authenticated:
+		request.session['login_redirect'] = 'booking_admin'
+		return redirect('login')
+
+	if not request.user.is_superuser:
+		return HttpResponse("Du har ikke tilgang til denne siden.")
+
+	#current settings
 	settings = AdminSettings.objects.first()
 
+	#Declare admin_form with current settings
 	admin_form = forms.BookingAdminForm(instance=settings)
-	# admin_form.helper.form_action = reverse('booking_admin')
-
-
-
 
 	#Update Admin Settings
 	if request.method == 'POST':
-
+		#Bind admin form to POST data
 		admin_form = forms.BookingAdminForm(instance=settings,  data=request.POST)
 
+		#Check what action to do
 		if 'action' in request.POST:
 			action = request.POST['action']
-			print("ACTION: " + action)
+
 			if action == 'reset_to_default':
+				#Reset settings
 				AdminSettings.reset_to_default()
+
+				#Update form
 				admin_form = forms.BookingAdminForm(instance=AdminSettings.objects.first())
+
 			elif action == 'save_settings':
+				#Check if admin form is valid
 				if not admin_form.is_valid():
-					request.session = add_alert(request, 'Klarer ikke oppdatere AdminSettings. Error: ' + admin_form.errors.__str__(), type='warning')
+					request.session = add_alert(request, 'Klarer ikke oppdatere Admin instillinger. Errors: ' + admin_form.errors.__str__(), type='warning')
 				else:
+					#Everything ok, save data
 					admin_form.save()
-					request.session = add_alert(request, 'AdminSettings oppdatert', type='primary')
+					request.session = add_alert(request, 'Admin instillinger oppdatert', type='primary')
 
 	args = {'admin_form': admin_form}
-			
 
 	#Show admin settings
 	args = add_alerts_from_session(request, args)
@@ -337,7 +349,42 @@ def BookingAdmin(request):
 	return render(request, 'main/booking_admin.html', args)
 
 
-	
+def LoginView(request):
+	if request.user.is_authenticated:
+		if 'login_redirect' in request.session:
+			return redirect(requet.session['login_redirect'])
+		return redirect('intern')
+
+	login_form = forms.LoginForm()
+	args = {'login_form': login_form}
+
+	if 'username' in request.POST and 'password' in request.POST:
+		login_form = forms.LoginForm(request.POST)
+		args['login_form'] = login_form
+
+		if not login_form.is_valid():
+			args['errors'] = login_form.errors.__str__()
+			return render(request, 'main/login.html', args)
+
+		#Login user
+
+		username = login_form.cleaned_data['username']
+		password = login_form.cleaned_data['password']
+
+		user = authenticate(request, username=username, password=password)
+
+		if user is not None:
+			login(request, user)
+			if 'login_redirect' in request.session:
+				return redirect(request.session['login_redirect'])
+			return redirect('intern')
+
+		#User failed to login
+		args['errors'] = 'Feil brukernavn eller passord'
+		return render(request, 'main/login.html', args)
+
+	#Display empty login form
+	return render(request, 'main/login.html', args)
 
 
 

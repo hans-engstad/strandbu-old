@@ -60,15 +60,19 @@ class ChargeForm(forms.Form):
 
 
 class BookingAdminForm(forms.ModelForm):
-	time_widget = forms.widgets.TimeInput()
-	valid_time_formats = ['%H:%M:%S']
+	# time_widget = forms.widgets.TimeInput()
+	# valid_time_formats = ['%H:%M:%S']
 
-	booking_close_time = forms.TimeField(widget=time_widget, input_formats=valid_time_formats)
+	# booking_close_time = forms.TimeField(widget=time_widget, input_formats=valid_time_formats)
 
 
 	class Meta:
 		model = models.AdminSettings
 		exclude = ('',)
 
+
+class LoginForm(forms.Form):
+	username = forms.CharField(max_length=100)
+	password = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=100)
 
 
