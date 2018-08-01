@@ -7,7 +7,8 @@
 			<br>
 			<br>
 			<div class="container">
-				<button type="button" class="btn btn-primary">Tilbake til intern side</button>
+				<button type="button" class="btn btn-primary" onClick="backToInternal()" >Tilbake til intern side</button>
+				<form id="back-to-internal-form" action="{% url 'intern' %}" >{% csrf_token %}</form>
 			</div>
 			<div class="center-hor">
 				<form method="POST" action="{% url 'booking_admin' %}">
@@ -58,6 +59,10 @@
 
 		function resetToDefault(){
 			$('#reset-to-default').submit();
+		}
+
+		function backToInternal(){
+			$('#back-to-internal-form').submit();
 		}
 
 	</script>

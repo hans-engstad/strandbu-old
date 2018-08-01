@@ -12,13 +12,17 @@
 					<div class="col">
 						<div class="card-deck center-hor">
 							{% static 'images/booking_calendar.png' as img_src_1 %}
+							{% static 'images/gear_wrench.png' as img_src_2 %}
+
 							{% include 'intern/nav_box.html' with img_src=img_src_1 title_name='Booking' onClick='submitForm("show-booking-form")' %}
 
+
+							{% if user.is_superuser %}
+								{% include 'intern/nav_box.html' with img_src=img_src_2 title_name='Admin' onClick='submitForm("show-admin-form")' %}
+							{% endif %}
+
+
 							<form id="show-booking-form" action="{% url 'intern_booking' %}" ></form>
-
-							{% static 'images/booking_calendar.png' as img_src_1 %}
-							{% include 'intern/nav_box.html' with img_src=img_src_1 title_name='Booking' onClick='submitForm("show-admin-form' %}
-
 							<form id="show-admin-form" action="{% url 'booking_admin' %}" ></form>
 
 						</div>
