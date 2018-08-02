@@ -272,7 +272,7 @@ class Booking(PolymorphicModel):
 	def get_final_bookings(cls, _from_date, _to_date):
 		bookings = FinalBooking.objects.all()
 		return cls.get_relevant_bookings(_from_date, _to_date, bookings)
-		
+
 
 	@classmethod
 	def get_relevant_bookings(cls, _from_date, _to_date, _all_bookings):
@@ -406,8 +406,6 @@ class TentativeBooking(Booking):
 
 		booking_error = Booking.get_create_booking_error(self.from_date, self.to_date, self.cabins.all(), Booking.objects.all(), t_booking=self)
 
-		print(booking_error)
-
 		if booking_error is not None:
 			return False
 
@@ -442,6 +440,19 @@ class FinalBooking(Booking):
 
 	def is_active(self):
 		return self.active
+
+	def double_booked(self):
+		self_booking_dates = get_dates_between(self.from_date, self.to_date)
+		for booking in Booking.objects.all():
+			if booking == self:
+				continue
+
+			booking_dates = get_dates_between(booking.from_date, booking.to_date)
+			for cabin in booking.cabins.all():
+				for self_cabin in self.cabins.all():
+					if dates_overlap(booking_dates, self_booking_dates) and cabin.number == self_cabin.number:
+						return True
+		return False
 
 	def __str__(self):
 		return Booking.__str__(self) + " F" + " (" + self.id.__str__() + ")"

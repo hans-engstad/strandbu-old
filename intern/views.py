@@ -83,20 +83,11 @@ def InternalBooking(request):
 				found_booking = True
 				relevant_bookings.append(booking)
 
-		row_data = []
-
-		print("CABIN " + cabin.number.__str__())
-		print(" ")
-
-		row_data.append('<th scope="row">' + cabin.number.__str__() + '</th>')
+		row_data = ['<th scope="row" class="booking-table-header-cell">' + cabin.number.__str__() + '</th>']
 
 		for date in dates_to_show:
 			date_bookings = []
 			for booking in relevant_bookings:
-				# if booking.from_date == date:
-				# 	bookings_to_show.append(booking)
-
-				#Add to check for double bookings
 				booking_dates = main_models.get_dates_between(booking.from_date, booking.to_date)
 				if main_models.dates_overlap([date], booking_dates):
 					date_bookings.append(booking)
@@ -104,16 +95,30 @@ def InternalBooking(request):
 			data = ""
 			col_span = "1"
 
+
 			if len(date_bookings) == 1:
 				if not date == date_bookings[0].from_date:
-					continue
-				data = '<div class="card bg-primary" style="padding:5px; color:white;" >' + date_bookings[0].contact.name + '</div>'
-				col_span = date_bookings[0].get_nights().__str__()
+					print("Not today: " + date.__str__())
+					print(date_bookings[0].double_booked().__str__())
+					print(date_bookings[0].__str__())
+					if not date_bookings[0].double_booked():
+						continue
 
+				print("-------------")
+				print(date_bookings.__str__())
+				print(date_bookings[0].double_booked())
+
+				data = '<div class="card bg-primary" style="padding:5px; color:white;" >' + date_bookings[0].contact.name + '</div>'
+				if date_bookings[0].double_booked():
+					col_span = "1"
+				else:
+					col_span = date_bookings[0].get_nights().__str__()
+					
 			if len(date_bookings) > 1:
+				# Double booking!
 				data = '<div class="card bg-danger" style="padding: 5px;" ><b>OBS! Dobbel booking</b></div>'
 
-			row_data.append('<td align="center" scope="col" colspan="' + col_span + '">' + data + '</td>')
+			row_data.append('<td align="center" class="booking-table-cell" scope="col" colspan="' + col_span + '">' + data + '</td>')
 
 		row = {
 			'data': row_data,
