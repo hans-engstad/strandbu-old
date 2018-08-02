@@ -48,8 +48,14 @@
 					<span class="navbar-toggler-icon"></span>
 				</button>
 
+
 				<div class="collapse navbar-collapse" id="navbarNav">
 					<ul class="nav navbar-nav ml-auto" id="nav-list">
+						{% if user.is_authenticated %}
+							<div class="col">
+								<span class="col nav-link-intern" style="font-size: 27px; font-weight: normal;">Logget inn som {{ user.username }}</span>
+							</div>
+						{% endif %}
 						<li class="nav-item active">
 							<a class="nav-link" href="#">Hjem<span class="sr-only">(current)</span></a>
 						</li>
@@ -68,7 +74,10 @@
 
 						{% if user.is_authenticated %}
 						<li class="nav-item active">
-							<a class="nav-link" href="#" onClick="logOut()" >Logg ut<span class="sr-only">(current)</span></a>
+							<a class="nav-link nav-link-intern" href="{% url 'intern' %}"  >INTERN<span class="sr-only">(current)</span></a>
+						</li>
+						<li class="nav-item active">
+							<a class="nav-link nav-link-intern" href="#" onClick="logOut()" >Logg ut<span class="sr-only">(current)</span></a>
 						</li>
 						<div class="hide">
 							<form id="logout-form" action="{% url 'logout' %}" ></form>

@@ -1,0 +1,24 @@
+/* line 3, staticfiles/scss/common/navbar.scss */
+html {
+  font-size: 100%; }
+
+/* line 14, staticfiles/scss/common/navbar.scss */
+#global-navbar {
+  background-color: #01588C;
+  border-radius: 0px;
+  height: 100px;
+  margin-bottom: 0px; }
+  /* line 20, staticfiles/scss/common/navbar.scss */
+  #global-navbar #nav-logo {
+    height: 46px; }
+  /* line 24, staticfiles/scss/common/navbar.scss */
+  #global-navbar .nav-link {
+    color: white;
+    font-weight: bold; }
+  /* line 29, staticfiles/scss/common/navbar.scss */
+  #global-navbar .nav-link-intern {
+    color: orange;
+    font-weight: bold; }
+  /* line 34, staticfiles/scss/common/navbar.scss */
+  #global-navbar .nav-link:hover, #global-navbar .nav-link:disabled, #global-navbar .nav-link:enabled {
+    background-color: #01588C; }

@@ -26,6 +26,11 @@ $link-color: white;
 		font-weight: bold;
 	}
 
+    .nav-link-intern{
+        color: orange;
+        font-weight: bold;   
+    }
+
 	.nav-link:hover, .nav-link:disabled, .nav-link:enabled {
 		background-color: $navbar-bg-color;
 	}

@@ -269,6 +269,12 @@ class Booking(PolymorphicModel):
 		return cls.get_relevant_bookings(_from_date, _to_date, bookings)
 
 	@classmethod
+	def get_final_bookings(cls, _from_date, _to_date):
+		bookings = FinalBooking.objects.all()
+		return cls.get_relevant_bookings(_from_date, _to_date, bookings)
+		
+
+	@classmethod
 	def get_relevant_bookings(cls, _from_date, _to_date, _all_bookings):
 		dates_to_check = get_dates_between(_from_date, _to_date)
 		for booking in _all_bookings:
@@ -310,6 +316,15 @@ class Booking(PolymorphicModel):
 				ids.append(cabin.id)
 		return Cabin.objects.filter(id__in=ids)
 
+
+	def contains_cabin_number(self, number):
+		for cabin in self.cabins.all():
+			if cabin.number == number:
+				return True
+		return False
+
+	def get_nights(self):
+		return len(get_dates_between(self.from_date, self.to_date))
 
 	def get_price(self):
 		nights = len(get_dates_between(self.from_date, self.to_date))

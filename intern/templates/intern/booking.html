@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+	<div class="container">
+		<br>
+		<h3 class="center-hor">Bestillinger</h3>
+		<br>
+		<table class="table table-bordered" >
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					{% for show_date in dates_to_show %}
+						<th scope="col">{{ show_date }}</th>
+					{% endfor %}
+				</tr>
+			</thead>
+			{% for row in cabin_rows %}
+				<tr>
+					{% for col in row.data %}
+						{{ col |safe}}
+					{% endfor %}
+				</tr>
+			{% endfor %}
+			
+		</table>
+	</div>
+
+{% endblock %}
+
+
