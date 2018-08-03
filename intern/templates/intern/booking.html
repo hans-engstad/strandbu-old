@@ -26,6 +26,32 @@
 			</table>
 		</div>
 	</div>
+
+
+	{# Modals #}
+	{% for booking in bookings %}
+		{% with id=booking.id|stringformat:"s" %}
+			{% with modal_id="booking-modal-"|add:id %}
+				{% include 'intern/booking_modal.html' with booking=booking id=modal_id %}			
+			{% endwith %}
+		{% endwith %}
+	{% endfor %}
+
+{% endblock %}
+
+
+{% block js %}
+	<script type="text/javascript">
+
+		function showBookingModal(id){
+			$(id).modal('show');
+		}
+
+		function showChargeCollapsable(id){
+			$(id).collapse('toggle');
+		}
+
+	</script>
 {% endblock %}
 
 

@@ -1,4 +1,4 @@
-
+@import '../common/variables';
 
 
 .booking-table-cell{
@@ -7,4 +7,40 @@
 
 .booking-table-header-cell{
 	background-color: #C0C0C0;
+}
+
+.booking-card{
+	padding: 5px;
+
+	&:hover{
+		cursor: pointer;
+	}
+}
+
+.date-card{
+	text-align:center;
+	padding:5px;
+}
+
+.modal-content{
+	background-color: $home-page-bg-color;
+}
+
+.modal-header {
+	min-height: 16.42857143px;
+	padding: 15px;
+	border-bottom: 1px solid #D0D0D0;
+}
+
+.modal-footer {
+	padding: 15px;
+	text-align: right;
+	border-top: 1px solid #D0D0D0;
+}
+
+.booking-modal-payed-checkmark{
+	width: 22px;
+	height: 22px;
+	position: relative;
+	top: 3px;
 }

@@ -437,6 +437,7 @@ class FinalBooking(Booking):
 	contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
 
 	charge_id = models.CharField(max_length=128, null=True, blank=True)
+	payed = models.BooleanField(default=False)
 
 	def is_active(self):
 		return self.active

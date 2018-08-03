@@ -260,6 +260,9 @@ def ChargeBooking(request):
 		return HttpResponse("Fatal error. Booking payed for but not reserved")
 
 	booking = Booking.objects.get(id=booking_result)
+
+	#Add payed on booking
+	booking.payed = True
 	
 	#Add late_arrival on booking
 	booking.late_arrival = contact_form.cleaned_data['late_arrival']

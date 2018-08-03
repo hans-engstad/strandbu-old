@@ -94,21 +94,19 @@ def InternalBooking(request):
 					
 			data = ""
 			col_span = "1"
-
+			card_attr = ""
 
 			if len(date_bookings) == 1:
 				if not date == date_bookings[0].from_date:
-					print("Not today: " + date.__str__())
-					print(date_bookings[0].double_booked().__str__())
-					print(date_bookings[0].__str__())
 					if not date_bookings[0].double_booked():
 						continue
 
-				print("-------------")
-				print(date_bookings.__str__())
-				print(date_bookings[0].double_booked())
+				# attr = 'data-toggle="modal" data-target="#booking-modal-' + date_bookings[0].id.__str__() + '"'
+				card_attr = 'class="card bg-primary booking-card" style="color:white" onClick="showBookingModal(\'#booking-modal-' + date_bookings[0].id.__str__() + '\')"'
+				
 
-				data = '<div class="card bg-primary" style="padding:5px; color:white;" >' + date_bookings[0].contact.name + '</div>'
+
+				data = '<div ' + card_attr + '>' + date_bookings[0].contact.name + '</div>'
 				if date_bookings[0].double_booked():
 					col_span = "1"
 				else:
@@ -116,7 +114,9 @@ def InternalBooking(request):
 					
 			if len(date_bookings) > 1:
 				# Double booking!
-				data = '<div class="card bg-danger" style="padding: 5px;" ><b>OBS! Dobbel booking</b></div>'
+				card_attr = ' class="card bg-danger booking-card" onClick="showBookingModal(\'#booking-modal-' + date_bookings[0].id.__str__() + '\')"'
+				data = '<div ' + card_attr + ' ><b>OBS! Dobbel booking</b></div>'
+				# attr = 'data-toggle="modal" data-target="#booking-modal-' + date_bookings[0].id + '"'
 
 			row_data.append('<td align="center" class="booking-table-cell" scope="col" colspan="' + col_span + '">' + data + '</td>')
 
@@ -132,6 +132,7 @@ def InternalBooking(request):
 	args = {
 		'cabin_rows': cabin_rows,
 		'dates_to_show': dates_to_show,
+		'bookings': bookings,
 	}
 
 

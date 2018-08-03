@@ -1,0 +1,14 @@
+/* line 4, staticfiles/scss/intern/intern_booking.scss */
+.booking-table-cell {
+  background-color: white; }
+
+/* line 8, staticfiles/scss/intern/intern_booking.scss */
+.booking-table-header-cell {
+  background-color: #C0C0C0; }
+
+/* line 12, staticfiles/scss/intern/intern_booking.scss */
+.booking-card {
+  padding: 5px; }
+  /* line 15, staticfiles/scss/intern/intern_booking.scss */
+  .booking-card:hover {
+    cursor: pointer; }

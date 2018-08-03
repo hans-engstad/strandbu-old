@@ -1,0 +1,42 @@
+/* line 4, staticfiles/scss/intern/intern_booking.scss */
+.booking-table-cell {
+  background-color: white; }
+
+/* line 8, staticfiles/scss/intern/intern_booking.scss */
+.booking-table-header-cell {
+  background-color: #C0C0C0; }
+
+/* line 12, staticfiles/scss/intern/intern_booking.scss */
+.booking-card {
+  padding: 5px; }
+  /* line 15, staticfiles/scss/intern/intern_booking.scss */
+  .booking-card:hover {
+    cursor: pointer; }
+
+/* line 20, staticfiles/scss/intern/intern_booking.scss */
+.date-card {
+  text-align: center;
+  padding: 5px; }
+
+/* line 25, staticfiles/scss/intern/intern_booking.scss */
+.modal-content {
+  background-color: #F0F1F5; }
+
+/* line 29, staticfiles/scss/intern/intern_booking.scss */
+.modal-header {
+  min-height: 16.42857143px;
+  padding: 15px;
+  border-bottom: 1px solid #D0D0D0; }
+
+/* line 35, staticfiles/scss/intern/intern_booking.scss */
+.modal-footer {
+  padding: 15px;
+  text-align: right;
+  border-top: 1px solid #D0D0D0; }
+
+/* line 41, staticfiles/scss/intern/intern_booking.scss */
+.booking-modal-payed-checkmark {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  top: 10px; }
