@@ -1,6 +1,8 @@
 {% load static %}
-<!-- Modal -->
-<div class="modal fade" id="show-booking-modal-{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{% load widget_tweaks %}
+
+<!-- Edit Modal -->
+<div class="modal fade" id="edit-booking-modal-{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -13,11 +15,19 @@
         <div class="row" >
           <div class="col">
             <h6 class="center-hor">Innsjekk</h6>
-            <div class="card date-card" >{{ booking.from_date }}</div>
+              {% with booking.id|stringformat:"s" as booking_id %}
+                {% with "id-from-date-"|add:booking_id as from_date_id %}
+                  <div class="card date-card" >{% render_field form.from_date id=from_date_id autocomplete="off" class="trans-input center-text" %}</div>
+                {% endwith %}
+              {% endwith %}
           </div>
           <div class="col">
             <h6 class="center-hor">Utsjekk</h6>
-            <div class="card date-card" >{{ booking.to_date }}</div>
+            {% with booking.id|stringformat:"s" as booking_id %}
+              {% with "id-to-date-"|add:booking_id as to_date_id %}
+                <div class="card date-card" >{% render_field form.to_date id=to_date_id autocomplete="off" class="trans-input center-text" %}</div>
+              {% endwith %}
+            {% endwith %}
           </div>
         </div>
         <br>
@@ -30,7 +40,7 @@
         <br>
         <h5 class="center-hor">Kontakt</h5>
           <ul class="list-group">
-            <li class="list-group-item"><b>Navn:</b> {{ booking.contact.name }}</li>
+            <li class="list-group-item"><b>Navn:</b> {{ form.contact.phone }}</li>
             <li class="list-group-item"><b>Mobilnummer:</b> {{ booking.contact.phone }}</li>
             <li class="list-group-item"><b>E-post:</b> {{ booking.contact.email }}</li>
             <li class="list-group-item"><b>Land:</b> {{ booking.contact.country }}</li>
@@ -44,8 +54,8 @@
         <ul class="list-group">
           {% if booking.payed %}
             {% if booking.charge_id %}
-              <li class="list-group-item" onClick="showChargeCollapsable('#charge-id-{{ booking.id }}')" style="cursor:pointer" >Betalt online</li>
-              <div id="charge-id-{{ booking.id }}" class="collapse">
+              <li class="list-group-item" onClick="showChargeCollapsable('#{{ booking.id }}-charge-id')" style="cursor:pointer" >Betalt online</li>
+              <div id="{{ booking.id }}-charge-id" class="collapse">
                 <li class="list-group-item" > <b>id:</b> {{ booking.charge_id }}</li>
               </div>
             {% else %}
@@ -58,7 +68,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Lukk</button>
-        <button id="edit-button-{{ id }}" type="button" class="btn btn-warning" onClick="showEditBookingModal('{{ booking.id }}')">Endre</button>
+        <button id="save-button-{{ booking.id }}" type="button" class="btn btn-primary" onClick="">Lagre</button>
       </div>
     </div>
   </div>

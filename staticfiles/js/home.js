@@ -39,7 +39,6 @@ $('#daterange-from-date').daterangepicker({
 			$('#daterange-to-date').data('daterangepicker').setStartDate(end);
 			$('#daterange-to-date').data('daterangepicker').setEndDate(end);
 		}
-
 	}
 );
 

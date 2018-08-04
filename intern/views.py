@@ -74,8 +74,9 @@ def InternalBooking(request):
 	dates_to_show = main_models.get_dates_between(from_date, to_date)
 
 	cabin_rows = []
+	edit_booking_forms = []
 
-	for cabin in main_models.Cabin.objects.all():
+	for cabin in main_models.Cabin.objects.all().order_by('number'):
 		found_booking = False
 		relevant_bookings = []
 		for booking in bookings:
@@ -97,24 +98,29 @@ def InternalBooking(request):
 			card_attr = ""
 
 			if len(date_bookings) == 1:
-				if not date == date_bookings[0].from_date:
-					if not date_bookings[0].double_booked():
+				booking = date_bookings[0]
+
+				if not date == booking.from_date:
+					if not booking.double_booked():
 						continue
 
+
 				# attr = 'data-toggle="modal" data-target="#booking-modal-' + date_bookings[0].id.__str__() + '"'
-				card_attr = 'class="card bg-primary booking-card" style="color:white" onClick="showBookingModal(\'#booking-modal-' + date_bookings[0].id.__str__() + '\')"'
+				card_attr = 'class="card bg-primary booking-card" style="color:white" onClick="showBookingModal(\'' + booking.id.__str__() + '\')"'
 				
+				booking_form = forms.EditBookingForm(instance=booking)
 
+				edit_booking_forms.append((booking, booking_form))
 
-				data = '<div ' + card_attr + '>' + date_bookings[0].contact.name + '</div>'
-				if date_bookings[0].double_booked():
+				data = '<div ' + card_attr + '>' + booking.contact.name + '</div>'
+				if booking.double_booked():
 					col_span = "1"
 				else:
-					col_span = date_bookings[0].get_nights().__str__()
+					col_span = booking.get_nights().__str__()
 					
 			if len(date_bookings) > 1:
 				# Double booking!
-				card_attr = ' class="card bg-danger booking-card" onClick="showBookingModal(\'#booking-modal-' + date_bookings[0].id.__str__() + '\')"'
+				card_attr = ' class="card bg-danger booking-card" onClick="showBookingModal(\'' + date_bookings[0].id.__str__() + '\')"'
 				data = '<div ' + card_attr + ' ><b>OBS! Dobbel booking</b></div>'
 				# attr = 'data-toggle="modal" data-target="#booking-modal-' + date_bookings[0].id + '"'
 
@@ -133,6 +139,7 @@ def InternalBooking(request):
 		'cabin_rows': cabin_rows,
 		'dates_to_show': dates_to_show,
 		'bookings': bookings,
+		'edit_booking_forms': edit_booking_forms,
 	}
 
 

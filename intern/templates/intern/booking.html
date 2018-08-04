@@ -28,14 +28,22 @@
 	</div>
 
 
-	{# Modals #}
+	{# Show Booking Modals #}
 	{% for booking in bookings %}
-		{% with id=booking.id|stringformat:"s" %}
-			{% with modal_id="booking-modal-"|add:id %}
-				{% include 'intern/booking_modal.html' with booking=booking id=modal_id %}			
-			{% endwith %}
-		{% endwith %}
+		{% include 'intern/booking_modal.html' with booking=booking %}
 	{% endfor %}
+
+	{# Edit Booking Modals #}
+	{% for booking, booking_form in edit_booking_forms %}
+		{% include 'intern/booking_modal_edit.html' with form=booking_form booking=booking %}
+	{% endfor %}
+
+	{# All Booking Ids #}
+	<div id="all-bookings" class="hide">
+		{% for booking in bookings %}
+			<input type="hidden" value="{{ booking.id }}" />
+		{% endfor %}
+	</div>
 
 {% endblock %}
 
@@ -43,13 +51,146 @@
 {% block js %}
 	<script type="text/javascript">
 
+
+		function editBookingModalDatepickerSetup(){
+			//Get IDs of all bookings currently showing
+			ids = []
+			$('#all-bookings').children('input').each(function () {
+				ids.push(this.value);
+			});
+
+			for(i = 0; i < ids.length; i++)
+			{
+				id = ids[i];
+				from_date_id = "#id-from-date-" + id.toString();
+				to_date_id = "#id-to-date-" + id.toString();
+
+				from_date = new Date($(from_date_id).val());
+				to_date = new Date($(to_date_id).val());
+				now = new Date();
+				tomorrow = now.setDate(now.getDate() + 1)
+
+				$(from_date_id).datepicker({
+					format: 'dd.mm.yyyy',
+					container: $(from_date_id).parent(),
+				}).on('changeDate', function(e){
+					datepickerCallback_from_date(id);
+				});
+
+				$(to_date_id).datepicker({
+					format: 'dd.mm.yyyy',
+					container: $(to_date_id).parent(),
+				}).on('changeDate', function(e){
+					datepickerCallback_to_date(id);
+				});
+
+				//Set current dates
+				$(from_date_id).datepicker('update', from_date);
+				$(to_date_id).datepicker('update', to_date);
+			}
+		}
+
+		function datepickerCallback_from_date(booking_id){
+			from_date_id = getFromDateID(booking_id);
+			to_date_id = getToDateID(booking_id);
+
+			from_date = $(from_date_id).datepicker('getDate');
+			to_date = $(to_date_id).datepicker('getDate');
+
+			if(from_date >= to_date)
+			{
+				to_date = from_date;
+				to_date = to_date.addDays(1);
+			}
+			updateDatepicker(booking_id, from_date, to_date);
+		}
+
+		function datepickerCallback_to_date(booking_id){
+			from_date_id = getFromDateID(booking_id);
+			to_date_id = getToDateID(booking_id);
+
+			from_date = $(from_date_id).datepicker('getDate');
+			to_date = $(to_date_id).datepicker('getDate');
+
+			if(from_date >= to_date)
+			{
+				from_date = to_date;
+				from_date = from_date.addDays(-1);
+			}
+			updateDatepicker(booking_id, from_date, to_date);
+		}
+
+		function updateDatepicker(booking_id, from_date, to_date){
+			from_date_id = getFromDateID(booking_id);
+			to_date_id = getToDateID(booking_id);
+
+			$(from_date_id).datepicker('update', from_date);
+			$(to_date_id).datepicker('update', to_date);
+
+		}
+
+		function getFromDateID(booking_id){
+			return "#id-from-date-" + booking_id.toString();
+		}
+
+		function getToDateID(booking_id){
+			return "#id-to-date-" + id.toString();
+		}
+
 		function showBookingModal(id){
-			$(id).modal('show');
+			$('#show-booking-modal-' + id).modal('show');
+			console.log(id);
 		}
 
 		function showChargeCollapsable(id){
 			$(id).collapse('toggle');
 		}
+
+		function showEditBookingModal(id){	
+			hideModal('show-booking-modal-' + id);
+			showModal('edit-booking-modal-' + id);
+		}
+
+
+
+		// SHOW / HIDE Modal functions
+
+		var hideInProgress = false;
+		var showModalId = '';
+
+		function showModal(elementId) {
+		    if (hideInProgress) {
+		        showModalId = elementId;
+		    } else {
+		        $("#" + elementId).modal("show");
+		    }
+		};
+
+		function hideModal(elementId) {
+		    hideInProgress = true;
+		    $("#" + elementId).on('hidden.bs.modal', hideCompleted);
+		    $("#" + elementId).modal("hide");
+
+		    function hideCompleted() {
+		        hideInProgress = false;
+		        if (showModalId) {
+		            showModal(showModalId);
+		        }
+		        showModalId = '';
+		        $("#" + elementId).off('hidden.bs.modal');
+		    }
+		};
+
+
+		Date.prototype.addDays = function(days) {
+			var date = new Date(this.valueOf());
+			date.setDate(date.getDate() + days);
+			return date;
+		}
+
+
+
+		editBookingModalDatepickerSetup();
 
 	</script>
 {% endblock %}
