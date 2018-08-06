@@ -532,7 +532,6 @@ def BookingOverview_add_cabin(request, _args):
 	choose_form = _args['choose_form']
 	if not choose_form.is_valid():
 		request.session = add_alert(request, 'Klarer ikke legge til hytte. Vennligst prøv igjen.', type='danger')
-		print("en")
 		return redirect('show_cabins')
 
 	#retrieve data from choose_form
@@ -570,8 +569,6 @@ def BookingOverview_add_cabin(request, _args):
 			print("tre")
 			return redirect('show_cabins')
 	request.session['t_booking_id'] = t_booking.id
-
-	print("SESSION ID: " + t_booking_id.__str__())
 
 	return BookingOverview_show(request, _args)
 

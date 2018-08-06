@@ -27,16 +27,21 @@
 		</div>
 	</div>
 
+	<div id="all-modals">
+		{# Show Booking Modals #}
+		{% for booking in bookings %}
+			{% include 'intern/booking_modal.html' with booking=booking %}
+		{% endfor %}
 
-	{# Show Booking Modals #}
-	{% for booking in bookings %}
-		{% include 'intern/booking_modal.html' with booking=booking %}
-	{% endfor %}
+		{# Edit Booking Modals #}
+		<div id="edit-booking-modals">
+			{% for booking, booking_form in edit_booking_forms %}
+				{% include 'intern/booking_modal_edit.html' with form=booking_form booking=booking %}
+				{% include 'intern/booking_modal_close.html' with booking=booking %}
+			{% endfor %}
+		</div>
+	</div>
 
-	{# Edit Booking Modals #}
-	{% for booking, booking_form in edit_booking_forms %}
-		{% include 'intern/booking_modal_edit.html' with form=booking_form booking=booking %}
-	{% endfor %}
 
 	{# All Booking Ids #}
 	<div id="all-bookings" class="hide">
@@ -90,6 +95,57 @@
 			}
 		}
 
+		function editBookingModalChangeEventSetup(){
+			//Get IDs of all bookings currently showing
+			ids = []
+			$('#all-bookings').children('input').each(function () {
+				ids.push(this.value);
+			});
+
+			//Note dates are handled in editBookingModalDatepickerSetup()
+			for(i = 0; i < ids.length; i++)
+			{
+				id = ids[i].toString();
+
+				fields = [];
+
+				fields.push($('#id-contact-name-' + id));
+				fields.push($('#id-contact-phone-' + id));
+				fields.push($('#id-contact-email-' + id));
+				fields.push($('#id-contact-country-' + id));
+
+				//Add event listener to all fields
+				for(j = 0; j < fields.length; j++)
+				{
+					// fields[j].change(fieldChanged(id));
+					fields[j].change(function(){
+						fieldChanged(id)
+					});
+				}
+			}
+		}
+
+		var originalModalHtml;
+
+		function originalModalHtmlSetup(){
+			originalModalHtml = $('#all-modals').html();
+		}
+
+		function resetAllModals(){
+			if(originalModalHtml != undefined && originalModalHtml != null)
+			{
+				$('#all-modals').replaceWith(originalModalHtml);
+				editBookingModalDatepickerSetup();
+				editBookingModalChangeEventSetup();
+			}
+		}
+
+		function fieldChanged(booking_id){
+			$('#booking-changed-' + booking_id.toString()).val(1);
+			console.log(booking_id);
+			console.log($('#booking-changed-' + booking_id.toString()).val());
+		}
+
 		function datepickerCallback_from_date(booking_id){
 			from_date_id = getFromDateID(booking_id);
 			to_date_id = getToDateID(booking_id);
@@ -103,6 +159,9 @@
 				to_date = to_date.addDays(1);
 			}
 			updateDatepicker(booking_id, from_date, to_date);
+
+			//set changed flag to 1
+			$('#booking-changed-' + booking_id.toString()).val(1);
 		}
 
 		function datepickerCallback_to_date(booking_id){
@@ -118,6 +177,9 @@
 				from_date = from_date.addDays(-1);
 			}
 			updateDatepicker(booking_id, from_date, to_date);
+
+			//set changed flag to 1
+			$('#booking-changed-' + booking_id.toString()).val(1);
 		}
 
 		function updateDatepicker(booking_id, from_date, to_date){
@@ -126,7 +188,6 @@
 
 			$(from_date_id).datepicker('update', from_date);
 			$(to_date_id).datepicker('update', to_date);
-
 		}
 
 		function getFromDateID(booking_id){
@@ -139,7 +200,6 @@
 
 		function showBookingModal(id){
 			$('#show-booking-modal-' + id).modal('show');
-			console.log(id);
 		}
 
 		function showChargeCollapsable(id){
@@ -151,6 +211,10 @@
 			showModal('edit-booking-modal-' + id);
 		}
 
+
+		function addCabin(booking_id){
+			
+		}
 
 
 		// SHOW / HIDE Modal functions
@@ -182,6 +246,31 @@
 		};
 
 
+		function closeEditBookingModal(booking_id){
+			//Check that we have not edited anything
+			console.log(booking_id);
+			console.log($('#booking-changed-' + booking_id.toString()).val());
+			if($('#booking-changed-' + booking_id.toString()).val() == 0)
+			{	
+				//We can safely close the modal
+				closeEditBookingModalForce(booking_id);
+			}
+			else
+			{
+				//We have unsaved progress
+				showModal('edit-booking-close-modal-' + booking_id.toString());
+			}
+		}
+
+		function closeEditBookingModalForce(booking_id){
+			hideModal('edit-booking-close-modal-' + booking_id.toString());
+			hideModal('edit-booking-modal-' + booking_id.toString());
+			setTimeout(function(){
+				resetAllModals()
+			}, 1000);
+		}
+
+
 		Date.prototype.addDays = function(days) {
 			var date = new Date(this.valueOf());
 			date.setDate(date.getDate() + days);
@@ -191,6 +280,8 @@
 
 
 		editBookingModalDatepickerSetup();
+		editBookingModalChangeEventSetup();
+		originalModalHtmlSetup();
 
 	</script>
 {% endblock %}

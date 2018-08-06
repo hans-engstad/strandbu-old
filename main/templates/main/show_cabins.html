@@ -98,7 +98,7 @@
 										<span style="position: relative;top: 3px;"> {{ cabin.persons }}</span>
 									</div>
 
-									<p class="default-link more-link">Mer om hytten</p>
+									<p class="default-link more-link" onClick="cabinShowMore({{ cabin.number }})" >Mer om hytten</p>
 									<div class="row">
 										<div class="col-6">
 											<table class="col-6">
@@ -155,4 +155,26 @@
 		</div>
 	</div>
 </div>
+
+{# Cabin Info Modals #}
+<div class="hide">
+	{% for key, cabin in cabins.items %}
+		{% include 'main/cabin_info_modal.html' with cabin=cabin %}
+	{% endfor %}
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+	
+	<script type="text/javascript">
+
+		function cabinShowMore(number){
+			// $('#cabin-info-modal-' + number.toString()).modal('show');
+		}
+
+	</script>
+
+
 {% endblock %}

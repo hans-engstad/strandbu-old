@@ -93,6 +93,14 @@ h1, h2, h3, h4, h5, h6, p, td{
 	text-align: center;
 }
 
+.red-text{
+	color: red;
+}
+
+.underline-text{
+	text-decoration: underline;
+}
+
 .default-input-label{
 	//line-height: 10px;
 	margin-bottom: 0px;
@@ -172,6 +180,10 @@ h1, h2, h3, h4, h5, h6, p, td{
 .center-ver{
 	display: flex;
 	align-items: center;
+}
+
+.modal {
+	overflow-y:auto;
 }
 
 .round {

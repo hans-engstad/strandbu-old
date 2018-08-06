@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from . import forms
-from main.views import add_alert
+from main.views import add_alert, add_alerts_from_session
 from main import models as main_models
 import datetime
 from django.utils import timezone
@@ -49,6 +49,8 @@ def LoginView(request):
 		args['errors'] = 'Feil brukernavn eller passord'
 		return render(request, 'intern/login.html', args)
 
+	args = add_alerts_from_session(request, args)
+
 	#Display empty login form
 	return render(request, 'intern/login.html', args)
 
@@ -56,7 +58,7 @@ def LogoutView(request):
 	logout(request)
 	request.session = add_alert(request, 'Du er nå logget ut.', type='primary')
 
-	return redirect('home')
+	return redirect('login')
 
 def InternalBooking(request):
 
@@ -108,7 +110,7 @@ def InternalBooking(request):
 				# attr = 'data-toggle="modal" data-target="#booking-modal-' + date_bookings[0].id.__str__() + '"'
 				card_attr = 'class="card bg-primary booking-card" style="color:white" onClick="showBookingModal(\'' + booking.id.__str__() + '\')"'
 				
-				booking_form = forms.EditBookingForm(instance=booking)
+				booking_form = forms.EditBookingForm(instance=booking, contact=booking.contact)
 
 				edit_booking_forms.append((booking, booking_form))
 

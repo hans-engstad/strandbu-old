@@ -12,3 +12,8 @@ class EditBookingForm(forms.ModelForm):
 	class Meta:
 		model = main_models.FinalBooking
 		fields = ('from_date', 'to_date', 'contact', 'payed', 'cabins', 'late_arrival', 'active', 'id')
+
+	def __init__(self, *args, **kwargs):
+		contact = kwargs.pop('contact','')
+		super(EditBookingForm, self).__init__(*args, **kwargs)
+		self.fields['contact'] = forms.ModelChoiceField(queryset=main_models.Contact.objects.filter(id=contact.id))

@@ -2,74 +2,100 @@
 {% load widget_tweaks %}
 
 <!-- Edit Modal -->
-<div class="modal fade" id="edit-booking-modal-{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="edit-booking-modal-{{ booking.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" data-backdrop="static" data-keyboard="false" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Bestilling</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="row" >
-          <div class="col">
-            <h6 class="center-hor">Innsjekk</h6>
-              {% with booking.id|stringformat:"s" as booking_id %}
-                {% with "id-from-date-"|add:booking_id as from_date_id %}
-                  <div class="card date-card" >{% render_field form.from_date id=from_date_id autocomplete="off" class="trans-input center-text" %}</div>
-                {% endwith %}
-              {% endwith %}
-          </div>
-          <div class="col">
-            <h6 class="center-hor">Utsjekk</h6>
-            {% with booking.id|stringformat:"s" as booking_id %}
-              {% with "id-to-date-"|add:booking_id as to_date_id %}
-                <div class="card date-card" >{% render_field form.to_date id=to_date_id autocomplete="off" class="trans-input center-text" %}</div>
-              {% endwith %}
-            {% endwith %}
-          </div>
+      {% with booking.id|stringformat:"s" as booking_id %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Endre Bestilling</h5>
+          <button type="button" class="close" onClick="closeEditBookingModal({{ booking.id }})" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <br>
-        <h5 class="center-hor">Hytter</h5>
-        <ul class="list-group">
-          {% for cabin in booking.cabins.all %}
-            <li class="list-group-item"><b>Hytte {{ cabin.number }}</b></li>
-          {% endfor %}
-        </ul>
-        <br>
-        <h5 class="center-hor">Kontakt</h5>
-          <ul class="list-group">
-            <li class="list-group-item"><b>Navn:</b> {{ form.contact.phone }}</li>
-            <li class="list-group-item"><b>Mobilnummer:</b> {{ booking.contact.phone }}</li>
-            <li class="list-group-item"><b>E-post:</b> {{ booking.contact.email }}</li>
-            <li class="list-group-item"><b>Land:</b> {{ booking.contact.country }}</li>
-          </ul>
-        <br>
-        <h5 class="center-hor">Betaling
-          {% if booking.payed %}
-            &nbsp;<img class="booking-modal-payed-checkmark" src="{% static 'images/checkmark.png' %}" />
-          {% endif %}
-        </h5>
-        <ul class="list-group">
-          {% if booking.payed %}
-            {% if booking.charge_id %}
-              <li class="list-group-item" onClick="showChargeCollapsable('#{{ booking.id }}-charge-id')" style="cursor:pointer" >Betalt online</li>
-              <div id="{{ booking.id }}-charge-id" class="collapse">
-                <li class="list-group-item" > <b>id:</b> {{ booking.charge_id }}</li>
+        <form id="edit-form-{{ booking.id }}" action="{% url 'home' %}" method="POST">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="row" >
+              <div class="col">
+                <h6 class="center-hor">Innsjekk</h6>
+                  {% with "id-from-date-"|add:booking_id as from_date_id %}
+                    <div class="card date-card" >{% render_field form.from_date id=from_date_id autocomplete="off" class="trans-input center-text" %}</div>
+                  {% endwith %}
               </div>
-            {% else %}
-              <li class="list-group-item">Betalt på camping</li>
-            {% endif %}
-          {% else %}
-              <li class="list-group-item">Ikke betalt</li>
-          {% endif %}
-         </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Lukk</button>
-        <button id="save-button-{{ booking.id }}" type="button" class="btn btn-primary" onClick="">Lagre</button>
-      </div>
+              <div class="col">
+                <h6 class="center-hor">Utsjekk</h6>
+                {% with "id-to-date-"|add:booking_id as to_date_id %}
+                  <div class="card date-card" >{% render_field form.to_date id=to_date_id autocomplete="off" class="trans-input center-text" %}</div>
+                {% endwith %}
+              </div>
+            </div>
+            <br>
+            <h5 class="center-hor">Hytter</h5>
+            <ul class="list-group">
+              {% for cabin in booking.cabins.all %}
+                <li class="list-group-item"><b>Hytte {{ cabin.number }}</b><span class="default-link float-right" style="color:red" >Fjern</span></li>
+              {% endfor %}
+            </ul>
+            <br>
+            <div class="center-hor">
+              <button class="btn" type="button" onClick="addCabin({{ booking.id }})" >Legg til hytte</button>
+            </div>
+            <br>
+            <h5 class="center-hor">Kontakt</h5>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  <div class="row">
+                    <b class="col-4">Navn:</b> 
+                    <input id="id-contact-name-{{ booking.id }}" class="col-lg" name="contact_name" value="{{ booking.contact.name }}" />
+                  </div>
+                </li>
+                <li class="list-group-item">
+                  <div class="row">
+                    <b class="col-4">Mobilnummer:</b> 
+                    <input id="id-contact-phone-{{ booking.id }}" class="col-lg" name="contact_phone" value="{{ booking.contact.phone }}" />
+                  </div>
+                </li>
+                <li class="list-group-item">
+                  <div class="row">
+                    <b class="col-4">E-post:</b> 
+                    <input id="id-contact-email-{{ booking.id }}" class="col-lg" name="contact_email" value="{{ booking.contact.email }}" />
+                  </div>
+                </li>
+                <li class="list-group-item">
+                  <div class="row">
+                    <b class="col-4">Land:</b> 
+                    <input id="id-contact-country-{{ booking.id }}" class="col-lg" name="contact_country" value="{{ booking.contact.country }}" />
+                  </div>
+                </li>
+              </ul>
+            <br>
+            <h5 class="center-hor">Betaling
+              {% if booking.payed %}
+                &nbsp;<img class="booking-modal-payed-checkmark" src="{% static 'images/checkmark.png' %}" />
+              {% endif %}
+            </h5>
+            <ul class="list-group">
+              {% if booking.payed %}
+                {% if booking.charge_id %}
+                  <li class="list-group-item" onClick="showChargeCollapsable('#{{ booking.id }}-charge-id')" style="cursor:pointer" >Betalt online</li>
+                  <div id="{{ booking.id }}-charge-id" class="collapse">
+                    <li class="list-group-item" > <b>id:</b> {{ booking.charge_id }}</li>
+                  </div>
+                {% else %}
+                  <li class="list-group-item">Betalt på camping</li>
+                {% endif %}
+              {% else %}
+                  <li class="list-group-item">Ikke betalt</li>
+              {% endif %}
+             </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onClick="closeEditBookingModal({{ booking.id }})" >Lukk</button>
+            <button id="save-button-{{ booking.id }}" type="submit" class="btn btn-primary" onClick="">Lagre</button>
+          </div>
+        </form>
+        <input type="hidden" id="booking-changed-{{ booking.id }}" value="0" />
+        {% endwith %}
     </div>
   </div>
 </div>
