@@ -354,6 +354,22 @@ def BookingAdmin(request):
 
 
 
+def GetPaymentIdView(request):
+	
+	if not request.method == 'GET'
+		return HttpResponse({"error": "Request method must be GET"})
+	
+	if not 't_booking_serialized' in request.GET:
+		return HttpResponse({"error": "t_booking_serialized must be attached to request"})
+
+	t_booking_serialized = request.GET.get('t_booking_serialized')
+
+	t_booking = 
+
+	return HttpResponse('ren')
+
+
+
 
 
 
@@ -569,6 +585,31 @@ def BookingOverview_add_cabin(request, _args):
 			print("tre")
 			return redirect('show_cabins')
 	request.session['t_booking_id'] = t_booking.id
+
+
+
+	payment_id_data = {
+		"order": {
+			"items": [{
+				"reference": "13",
+				"name": "testproduct 1",
+				"quantity": 2,
+				"unit": "pcs",
+				"unitPrice": 48648,
+				"taxRate": 2500,
+				"taxAmount": 24324,
+				"grossTotalAmount": 121620,
+				"netTotalAmount": 97296
+				}],
+			"amount": 401220,
+			"currency": "nok",
+			"reference": "Demo Order"
+		},
+		"checkout": {
+			"url": "https://www.mydomain.com/checkout",
+			"termsUrl": "https://www.mydomain.com/toc"
+		}
+	}
 
 	return BookingOverview_show(request, _args)
 

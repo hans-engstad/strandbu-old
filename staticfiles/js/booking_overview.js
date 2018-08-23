@@ -1,6 +1,73 @@
 
 
 
+$("#CreatePayment").on('click', function() {
+    $.ajax({
+        url: 'api/get_payment_id',
+        data: {
+            "t_booking_serialized": $('#t_booking_serialized').val()
+        },
+        dataType: 'json',
+        success: function(data) {
+            paymentID = JSON.stringify(data);
+            var obj = jQuery.parseJSON(paymentID);
+            paymentID = obj.paymentId;
+            intitCheckout(paymentID);
+        }
+    });
+});
+
+var checkoutOptions = {
+  checkoutKey: "test-checkout-key-5342daee79e54519a6368a728721c532", //[Required] Test or Live GUID with dashes
+
+  paymentId : $('#payment-id').val().toString(), //[required] GUID without dashes
+  containerId : "dibs-complete-checkout", //[optional] defaultValue: dibs-checkout-content
+  language: "en-GB",            //[optional] defaultValue: en-GB
+};
+var checkout = new Dibs.Checkout(checkoutOptions);
+ 
+//this is the event that the merchant should listen to redirect to the “payment-is-ok” page
+ 
+checkout.on('payment-completed', function(response) {
+               /*
+               Response:
+                              paymentId: string (GUID without dashes)
+               */
+               window.location = '/PaymentSuccessful';
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function AddCabin(){
   $('#add-cabin-form').submit();
 }
@@ -9,6 +76,7 @@ function RemoveCabin(number){
   $('#remove-cabin-' + number).submit();
 }
 
+/*
 
 var handler = StripeCheckout.configure({
   key: 'pk_test_sAnddD1C8K3Nv4QefeGpEBiS',
@@ -66,6 +134,7 @@ window.addEventListener('popstate', function() {
   handler.close();
 });
 
+*/
 
 $('#accept-conditions-checkbox').change(
     function(){

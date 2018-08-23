@@ -6,7 +6,9 @@
 	<div class="container">
 
 		<br>
-		
+		<div id="search-box" class="cabin-search-result hide">
+			{% include 'main/cabin_search_box.html' with form=cabin_search_form %}
+		</div>
 		<div class="cabin-search-result row">
 			<div class="col">
 				{% if action == 'add_cabin' %}
@@ -21,14 +23,9 @@
 					<a id="change-search-link" class="default-link" href="#" onClick="ChangeSearchShow()">Endre søk</a>
 				{% endif %}
 			</div>
-
-			
-			
 		</div>
 
-		<div id="search-box" class="cabin-search-result hide">
-			{% include 'main/cabin_search_box.html' with form=cabin_search_form %}
-		</div>
+		
 
 		{% if info_header != "" %}
 			<p id="info-header">{{ info_header | safe }}</p>

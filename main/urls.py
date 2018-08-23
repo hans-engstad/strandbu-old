@@ -10,4 +10,6 @@ urlpatterns = [
     url(r'^booking/charge$', views.ChargeBooking, name="charge_booking"),
     url(r'^booking/confirmation$', views.BookingConfirmation, name="booking_confirmation"),
 
+    url(r'^booking/api/get_payment_id$', views.GetPaymentIdView, name="get_payment_id")
+
 ]
